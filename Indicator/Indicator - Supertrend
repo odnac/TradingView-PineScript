@@ -1,5 +1,5 @@
 //@version=5
-indicator("I-turtle-Supertrend", overlay=true)
+indicator("Indicator - Supertrend", overlay=true)
 
 [supertrend, direction] = ta.supertrend(3, 10)
 plot(supertrend, color = color.rgb(33, 149, 243, 85), linewidth = 2, style = plot.style_steplinebr)

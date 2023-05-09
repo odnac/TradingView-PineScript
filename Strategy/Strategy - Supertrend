@@ -1,5 +1,5 @@
 //@version=5
-strategy("S-turtle-Supertrend", overlay=true, default_qty_value = 100, default_qty_type = strategy.percent_of_equity, initial_capital = 1000000, process_orders_on_close = true)
+strategy("Strategy - Supertrend", overlay=true, default_qty_value = 100, default_qty_type = strategy.percent_of_equity, initial_capital = 1000000, process_orders_on_close = true)
 
 [supertrend, direction] = ta.supertrend(3, 10)
 plot(supertrend, color = color.rgb(33, 149, 243, 85), linewidth = 2, style = plot.style_steplinebr)

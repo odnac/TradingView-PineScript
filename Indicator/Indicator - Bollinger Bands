@@ -1,5 +1,5 @@
 //@version=5
-indicator("I-turtle-Bollinger Bands", overlay=true)
+indicator("Indicator - Bollinger Bands", overlay=true)
 
 source = close
 length = input.int(20, minval=1)

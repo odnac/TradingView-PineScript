@@ -1,5 +1,5 @@
 //@version=5
-strategy("S-turtle RSI", default_qty_value = 100, default_qty_type = strategy.percent_of_equity, initial_capital = 1000000)	// process_orders_on_close = true
+strategy("Strategy - RSI", default_qty_value = 100, default_qty_type = strategy.percent_of_equity, initial_capital = 1000000)	// process_orders_on_close = true
 
 
 /////////////////// rsi 기본 설정///////////////////

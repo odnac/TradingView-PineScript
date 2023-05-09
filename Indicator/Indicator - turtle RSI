@@ -1,5 +1,5 @@
 //@version=5
-indicator("I-turtle RSI") //overlay = true, scale =  scale.right
+indicator("Indicator - turtle RSI") //overlay = true, scale =  scale.right
 
 
 /////////////////// rsi 기본 설정///////////////////
