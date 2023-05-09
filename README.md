@@ -1,3 +1,3 @@
-tradigviw indicator & strategy  
+tradigview indicator & strategy  
 
 
