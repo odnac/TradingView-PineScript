@@ -1,0 +1,19 @@
+//@version=5
+strategy("S-turtle-Supertrend", overlay=true, default_qty_value = 100, default_qty_type = strategy.percent_of_equity, initial_capital = 1000000, process_orders_on_close = true)
+
+[supertrend, direction] = ta.supertrend(3, 10)
+plot(supertrend, color = color.rgb(33, 149, 243, 85), linewidth = 2, style = plot.style_steplinebr)
+
+// direciton -1 롱, 1 숏
+bgcolor(direction < 0 ? color.rgb(76, 175, 79, 97) : na)    // 롱 초록
+//bgcolor(direction > 0 ? color.rgb(255, 82, 82, 97) : na)    // 숏 빨강
+
+if direction < 0
+    strategy.entry("long", strategy.long)
+
+if direction > 0
+    strategy.close("long")
+
+// if ta.change(direction) > 0
+//     strategy.entry("My Short Entry Id", strategy.short)
+

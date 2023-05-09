@@ -1,5 +1,5 @@
 //@version=5
-strategy("T-turtle RSI", default_qty_value = 100, default_qty_type = strategy.percent_of_equity, initial_capital = 1000000)	// process_orders_on_close = true
+strategy("S-turtle RSI", default_qty_value = 100, default_qty_type = strategy.percent_of_equity, initial_capital = 1000000)	// process_orders_on_close = true
 
 
 /////////////////// rsi 기본 설정///////////////////
@@ -57,17 +57,20 @@ plotshape(
 	 textcolor = color.white
 	 )
 
+
+/////////////////// 매매 방식 롱 클로즈 또는 롱숏 전략 설정///////////////////
+
 // close_order = ta.crossover(rsi, 70)
 // strategy.entry("long", strategy.long, when = bullCond)
 // strategy.close("long", when = ta.crossover(rsi, 70))    // 청산 기준
 // strategy.exit("exit", "long", stop = strategy.position_avg_price * 0.95)	// limit = strategy.position_avg_price * 1.1
 
 if bullCond
-	strategy.entry("long", strategy.long)
+	strategy.entry("long", strategy.long, comment="enter_long")
 	// if strategy.position_size == 0
 	// 	strategy.exit("exit", "long", stop = close * 0.95)
 
 if ta.crossover(rsi, 70)
-	strategy.close("long")
+	strategy.close("long", comment="close_long")
 
 
