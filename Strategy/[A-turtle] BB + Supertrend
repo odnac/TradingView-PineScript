@@ -38,3 +38,5 @@ if St_direction < 0 and ta.crossover(close, BB_lower_line)	//수퍼트렌드 안
 
 if ta.crossunder(close, BB_upper_line)	//상단 볼린저 밴드를 뚫고 내려올 때 포지션 종료
 	strategy.close("long")
+
+// strategy.exit("exit", "long", stop = strategy.position_avg_price * 0.97) // 1시간 봉 이상일 때는 하는게 좋은 듯
