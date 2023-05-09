@@ -20,7 +20,7 @@ plot(BB_lower_line, "Lower", color=color.rgb(255, 255, 255, 85), offset = BB_off
 /////////////////////////// Supertrend ///////////////////////////
 
 [St_supertrend, St_direction] = ta.supertrend(3, 10)
-plot(St_supertrend, color = color.rgb(33, 149, 243, 85), linewidth = 2, style = plot.style_steplinebr)
+//plot(St_supertrend, color = color.rgb(33, 149, 243, 85), linewidth = 2, style = plot.style_steplinebr)
 
 // St_direciton -1 롱, 1 숏
 bgcolor(St_direction < 0 ? color.rgb(76, 175, 79, 95) : na)    // 롱 초록
