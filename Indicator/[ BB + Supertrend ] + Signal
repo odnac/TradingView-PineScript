@@ -1,6 +1,5 @@
 //@version=5
-strategy("[ A-turtle ] BB + Supertrend", overlay=true, default_qty_value = 100, default_qty_type = strategy.percent_of_equity, initial_capital = 1000000, process_orders_on_close = true)
-
+indicator("[ BB + Supertrend ] + Signal", overlay = true)
 
 /////////////////////////// BB ///////////////////////////
 
@@ -21,7 +20,7 @@ plot(BB_lower_line, "Lower", color=color.rgb(255, 255, 255, 85), offset = BB_off
 /////////////////////////// Supertrend ///////////////////////////
 
 [St_supertrend, St_direction] = ta.supertrend(3, 10)
-plot(St_supertrend, color = color.rgb(33, 149, 243, 85), linewidth = 2, style = plot.style_steplinebr)
+//plot(St_supertrend, color = color.rgb(33, 149, 243, 85), linewidth = 2, style = plot.style_steplinebr)
 
 // St_direciton -1 롱, 1 숏
 bgcolor(St_direction < 0 ? color.rgb(76, 175, 79, 95) : na)    // 롱 초록
@@ -31,12 +30,12 @@ bgcolor(St_direction < 0 ? color.rgb(76, 175, 79, 95) : na)    // 롱 초록
 /////////////////////////// 추가할 지표 ///////////////////////////
 
 
-/////////////////////////// 진입 청산 ///////////////////////////
+/////////////////////////// 공통부분 매수(초록) 종료 (빨강) 신호 ///////////////////////////
 
-if St_direction < 0 and ta.crossover(close, BB_lower_line)	//수퍼트렌드 안에서 볼린저 밴드 하단을 뚫고 올라갈 때 롱 진입
-	strategy.entry("long", strategy.long)
+long_signal = St_direction < 0 and ta.crossover(close, BB_lower_line)   // 수퍼트렌드 안에서 볼린저 밴드 하단을 뚫고 올라갈 때 롱 진입
 
-if ta.crossunder(close, BB_upper_line)	//상단 볼린저 밴드를 뚫고 내려올 때 포지션 종료
-	strategy.close("long")
+colse_signal = ta.crossunder(close, BB_upper_line) // 상단 볼린저 밴드를 뚫고 내려올 때 포지션 종료
 
-// strategy.exit("exit", "long", stop = strategy.position_avg_price * 0.97) // 1시간 봉 이상일 때는 하는게 좋은 듯
+plotshape(series = long_signal, location = location.belowbar, style = shape.labelup, color = color.green, text = "L", textcolor = color.white, size = size.auto) // 롱 진입
+
+plotshape(series = colse_signal, location = location.abovebar, style = shape.labeldown, color = color.red, text = "C", textcolor = color.white, size = size.auto) // 종료

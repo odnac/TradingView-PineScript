@@ -1,5 +1,5 @@
 //@version=5
-indicator("[ indicator ] BB+Supertrend", overlay = true)
+indicator("[ BB + Supertrend ]", overlay = true)
 
 /////////////////////////// BB ///////////////////////////
 
