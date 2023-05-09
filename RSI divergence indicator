@@ -58,3 +58,27 @@ plotshape(
 	 )
 
 
+/////////////////// rsi 하락 다이버전스 ///////////////////
+
+is_pivot_low = rsi[pivot_rights] < ta.valuewhen(highest_pivot, rsi[pivot_rights], 1)	// rsi가 낮아지는지
+is_price_high = high[pivot_rights] > ta.valuewhen(highest_pivot, high[pivot_rights], 1)	// 가격이 높아지는지
+bearCond = highest_pivot and is_pivot_low and is_price_high and _inRange(highest_pivot[1])
+
+plot(
+     highest_pivot ? rsi[pivot_rights] : na,
+     offset = -pivot_rights,
+     title = "Regular Bearish",
+     linewidth = 2,
+     color = (bearCond ? color.red : na)
+     )
+
+plotshape(
+	 bearCond ? rsi[pivot_rights] : na,
+	 offset = -pivot_rights,
+	 title = "Regular Bearish Label",
+	 text = " Bear ",
+	 style = shape.labelup,
+	 location = location.absolute,
+	 color = color.red,
+	 textcolor = color.white
+	 )
