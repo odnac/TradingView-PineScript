@@ -1,5 +1,5 @@
 //@version=5
-strategy("Strategy - Bollinger Bands directed", overlay=true, default_qty_value = 100, default_qty_type = strategy.percent_of_equity, initial_capital = 1000000)
+strategy("Strategy - Bollinger Bands (2)", overlay=true, default_qty_value = 100, default_qty_type = strategy.percent_of_equity, initial_capital = 1000000)
 
 source = close
 length = input.int(20, minval=1)

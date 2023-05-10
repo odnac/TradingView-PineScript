@@ -1,5 +1,5 @@
 //@version=5
-strategy("[ BB + Supertrend ] + turtle", overlay=true, default_qty_value = 100, default_qty_type = strategy.percent_of_equity, initial_capital = 1000000, process_orders_on_close = true)
+strategy("[ BB + Supertrend ] + turtle (2)", overlay=true, default_qty_value = 100, default_qty_type = strategy.percent_of_equity, initial_capital = 1000000, process_orders_on_close = true)
 
 
 /////////////////////////// BB ///////////////////////////
@@ -33,10 +33,18 @@ bgcolor(St_direction < 0 ? color.rgb(76, 175, 79, 95) : na)    // 롱 초록
 
 /////////////////////////// 진입 청산 ///////////////////////////
 
+// if St_direction < 0 and ta.crossover(close, BB_lower_line)	//수퍼트렌드 안에서 볼린저 밴드 하단을 뚫고 올라갈 때 롱 진입
+// 	strategy.entry("long", strategy.long)
+
+// if ta.crossunder(close, BB_upper_line)	//상단 볼린저 밴드를 뚫고 내려올 때 포지션 종료
+// 	strategy.close("long")
+
 if St_direction < 0 and ta.crossover(close, BB_lower_line)	//수퍼트렌드 안에서 볼린저 밴드 하단을 뚫고 올라갈 때 롱 진입
 	strategy.entry("long", strategy.long)
-
-if ta.crossunder(close, BB_upper_line)	//상단 볼린저 밴드를 뚫고 내려올 때 포지션 종료
-	strategy.close("long")
-
+else
+    strategy.cancel(id="long")
+if St_direction > 0 and ta.crossunder(close, BB_upper_line)	//상단 볼린저 밴드를 뚫고 내려올 때 포지션 종료
+	strategy.entry("short", strategy.short)
+else
+    strategy.cancel(id="short")
 // strategy.exit("exit", "long", stop = strategy.position_avg_price * 0.97) // 1시간 봉 이상일 때는 하는게 좋은 듯
