@@ -1,0 +1,31 @@
+//@version=5
+indicator("[ RSI + MFI ] + Signal")
+
+
+/////////////////// rsi 기본 설정///////////////////
+
+rsi_high_line = input.int(70, minval = 50, maxval = 100)
+rsi_low_line = input.int(30, minval = 0, maxval = 50)
+hline(rsi_high_line, linestyle = hline.style_dotted, color = color.rgb(255, 70, 70, 50), title = "rsi_high")
+hline(50, linestyle = hline.style_dotted, color = color.rgb(255, 153, 0, 50), title = "mid")
+hline(rsi_low_line, linestyle = hline.style_dotted, color = color.rgb(255, 70, 70, 50), title = "rsi_low")
+
+rsi_period = input.int(14, minval=1)
+rsi = ta.rsi(close, rsi_period)
+
+rsi_line_color = rsi <= rsi_low_line ?color.rgb(255, 73, 73) : ( rsi >= rsi_high_line ? color.rgb(255, 73, 73) :color.rgb(255, 82, 82, 60))
+plot(rsi, color = rsi_line_color, join = true,  style = plot.style_circles, trackprice = true) //trackprice = true
+
+
+/////////////////// mfi 기본 설정///////////////////
+mfi_high_line = input.int(80, minval = 50, maxval = 100)
+mfi_low_line = input.int(20, minval = 0, maxval = 50)
+hline(mfi_high_line, linestyle = hline.style_dotted, color = color.rgb(33, 149, 243, 50), title = "mfi_high")
+hline(mfi_low_line, linestyle = hline.style_dotted, color = color.rgb(33, 149, 243, 50), title = "mfi_low")
+
+mfi_length = input.int(14, minval=1, maxval=2000)
+mfi = ta.mfi(hlc3, mfi_length)
+
+mfi_line_color = mfi <= mfi_low_line ? color.rgb(0, 140, 255) : ( mfi >= mfi_high_line ? color.rgb(0, 140, 255) : color.rgb(33, 149, 243, 60))
+// mfi_line_color = mfi <= mfi_low_line ? color.rgb(5, 252, 13) : ( mfi >= mfi_high_line ? color.rgb(5, 252, 13) : color.rgb(255, 255, 255, 50))
+plot(mfi, "MF", color=mfi_line_color, trackprice = true)
