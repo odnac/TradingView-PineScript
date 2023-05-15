@@ -1,8 +1,5 @@
-// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
-// © seung67461
-
 //@version=5
-indicator("[ BB + Supertrend + Engulfing ] + Signal", overlay = true)
+indicator("[ BB + Supertrend + Engulfing + EMA ] + Signal", overlay = true)
 
 
 /////////////////////////// BB ///////////////////////////
@@ -38,13 +35,13 @@ bgcolor(St_direction < 0 ? color.rgb(76, 175, 79, 95) : na)    // 롱 초록
 bgcolor(St_direction > 0 ? color.rgb(255, 82, 82, 97) : na)    // 숏 빨강
 
 // Supertrend 시그널
-//초록 배경이 롱 시그널임
-//무 배경이 숏 시그널임
+// 초록 배경이 롱 시그널임
+// 무 배경이 숏 시그널임
 
 
 /////////////////////////// Engulfing ///////////////////////////
 
-//기본 설정
+// 기본 설정
 Eg_DownTrend = true
 Eg_UpTrend = true
 var Eg_trendRule1 = "SMA50"
@@ -95,6 +92,31 @@ plotshape(series = Eg_EngulfingBullish, style = shape.arrowup, location = locati
 
 Eg_EngulfingBearish = Eg_UpTrend and Eg_BlackBody and Eg_LongBody and Eg_WhiteBody[1] and Eg_SmallBody[1] and close <= open[1] and open >= close[1] and ( close < open[1] or open > close[1] )
 plotshape(series = Eg_EngulfingBearish, style = shape.arrowdown, location = location.abovebar, color = color.rgb(255, 255, 255, 90), text = "Eg_S", size = size.tiny, textcolor = color.rgb(255, 255, 255, 90))
+
+
+/////////////////////////// EMA ///////////////////////////
+
+// 단기 이동평균 
+EMA_short_len = input.int(5, minval=1)
+EMA_short_src = input(close)
+EMA_short = ta.ema(EMA_short_src, EMA_short_len)
+EMA_short_plot = plot(EMA_short , color=color.rgb(255, 255, 255, 50), linewidth = 2)
+
+// 중기 이동평균
+EMA_medium_len = input.int(20, minval=1)
+EMA_medium_src = input(close)
+EMA_medium = ta.ema(EMA_medium_src, EMA_medium_len)
+EMA_medium_plot = plot(EMA_medium , color=color.rgb(255, 153, 0, 50), linewidth = 2)
+
+// 장기 이동평균
+EMA_long_len = input.int(40, minval=1)
+EMA_long_src = input(close)
+EMA_long= ta.ema(EMA_long_src, EMA_long_len)
+EMA_long_plot = plot(EMA_long , color=color.rgb(255, 235, 59, 50), linewidth = 2)
+
+//중기 장기를 지지 저항
+fill(EMA_medium_plot, EMA_long_plot, color = color.rgb(255, 255, 255, 90))
+
 
 /////////////////////////// 추가할 지표 ///////////////////////////
 
