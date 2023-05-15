@@ -1,5 +1,5 @@
 //@version=5
-indicator("[ BB + Supertrend + Engulfing + EMA ] + Signal", overlay = true)
+indicator("[ BB + Supertrend + Engulfing + EMA + turtle] + Signal", overlay = true)
 
 
 /////////////////////////// BB ///////////////////////////
@@ -13,9 +13,9 @@ BB_upper_line = BB_mid_line + BB_distance
 BB_lower_line = BB_mid_line - BB_distance
 
 BB_offset = input.int(0, "Offset", minval = -500, maxval = 500)
-plot(BB_mid_line, "Basis", color=color.rgb(255, 165, 0, 85), offset = BB_offset)
-plot(BB_upper_line, "Upper", color=color.rgb(255, 255, 255, 85), offset = BB_offset)
-plot(BB_lower_line, "Lower", color=color.rgb(255, 255, 255, 85), offset = BB_offset)
+plot(BB_mid_line, "Basis", color=color.rgb(255, 165, 0, 85), linewidth = 2, offset = BB_offset)
+plot(BB_upper_line, "Upper", color=color.rgb(255, 255, 255, 85), linewidth = 2, offset = BB_offset)
+plot(BB_lower_line, "Lower", color=color.rgb(255, 255, 255, 85), linewidth = 2, offset = BB_offset)
 
 // BB 시그널
 BB_long_signal = ta.crossover(close, BB_lower_line)   // 볼린저 밴드 하단을 뚫고 올라갈 때 롱 시그널
@@ -28,7 +28,7 @@ plotshape(series = BB_short_signal, style = shape.arrowdown, location = location
 /////////////////////////// Supertrend ///////////////////////////
 
 [St_supertrend, St_direction] = ta.supertrend(3, 10)
-plot(St_supertrend, color = color.rgb(33, 149, 243, 85), linewidth = 2, style = plot.style_steplinebr)
+// plot(St_supertrend, color = color.rgb(33, 149, 243, 85), linewidth = 2, style = plot.style_steplinebr)
 
 // St_direciton -1 롱, 1 숏
 bgcolor(St_direction < 0 ? color.rgb(76, 175, 79, 95) : na)    // 롱 초록
@@ -116,6 +116,29 @@ EMA_long_plot = plot(EMA_long , color=color.rgb(255, 235, 59, 50), linewidth = 2
 
 //중기 장기를 지지 저항
 fill(EMA_medium_plot, EMA_long_plot, color = color.rgb(255, 255, 255, 90))
+
+
+/////////////////////////// turtle ///////////////////////////
+
+// 롱 시그널
+long_enter = ta.highest(close, 20)[1]
+long_close = ta.lowest(close, 10)[1]
+
+plot(long_enter, color = color.rgb(0, 230, 119, 80), linewidth = 2)
+plot(long_close, color = color.rgb(0, 230, 119, 80), linewidth = 2)
+
+turtle_long_signal = ta.crossover(close, long_enter)
+plotshape(series = turtle_long_signal, style = shape.arrowup, location = location.belowbar, color = color.rgb(255, 255, 255, 90), text = "tt_L", size = size.tiny, textcolor = color.rgb(255, 255, 255, 90))
+
+turtle_close_long_signal = ta.crossunder(close, long_close)
+plotshape(series = turtle_close_long_signal, style = shape.arrowdown, location = location.abovebar, color = color.rgb(255, 255, 255, 90), text = "tt_L_C", size = size.tiny, textcolor = color.rgb(255, 255, 255, 90))
+
+// 숏 시그널
+short_enter = ta.lowest(close, 20)
+short_close = ta.highest(close, 10)
+
+plot(short_enter, color = color.rgb(155, 39, 176, 70), linewidth = 2)
+plot(short_close, color = color.rgb(155, 39, 176, 70), linewidth = 2)
 
 
 /////////////////////////// 추가할 지표 ///////////////////////////
