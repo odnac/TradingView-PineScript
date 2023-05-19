@@ -7,7 +7,7 @@ indicator("[ Trend - U ]", overlay = true)
 [St_supertrend, St_direction] = ta.supertrend(3, 10)
 // plot(St_supertrend, color = color.rgb(33, 149, 243, 85), linewidth = 2, style = plot.style_steplinebr)
 
-// St_direciton -1 롱, 1 숏
+// // St_direciton -1 롱, 1 숏
 // bgcolor(St_direction < 0 ? color.rgb(76, 175, 79, 95) : na)    // 롱 초록
 // bgcolor(St_direction > 0 ? color.rgb(255, 82, 82, 97) : na)    // 숏 빨강
 
@@ -22,23 +22,23 @@ St_short_signal = St_direction > 0
 EMA_short_len = input.int(5, minval=1)
 EMA_short_src = input(close)
 EMA_short = ta.ema(EMA_short_src, EMA_short_len)
-EMA_short_plot = plot(EMA_short , color=color.rgb(255, 255, 255, 50), linewidth = 2)
+// EMA_short_plot = plot(EMA_short , color=color.rgb(255, 255, 255, 50), linewidth = 2)
 
 // 중기 이동평균
 EMA_medium_len = input.int(20, minval=1)
 EMA_medium_src = input(close)
 EMA_medium = ta.ema(EMA_medium_src, EMA_medium_len)
-EMA_medium_plot = plot(EMA_medium , color=color.rgb(255, 153, 0, 0), linewidth = 2)
+// EMA_medium_plot = plot(EMA_medium , color=color.rgb(255, 153, 0, 0), linewidth = 2)
 
 // 장기 이동평균
 EMA_long_len = input.int(40, minval=1)
 EMA_long_src = input(close)
 EMA_long = ta.ema(EMA_long_src, EMA_long_len)
-EMA_long_plot = plot(EMA_long , color=color.rgb(255, 235, 59, 50), linewidth = 2)
+// EMA_long_plot = plot(EMA_long , color=color.rgb(255, 235, 59, 50), linewidth = 2)
 
 // 중기 장기를 지지 저항
 sr_color = EMA_medium > EMA_long ? color.rgb(33, 149, 243, 80) : color.rgb(255, 82, 82, 80)
-fill(EMA_medium_plot, EMA_long_plot, color = sr_color)
+// fill(EMA_medium_plot, EMA_long_plot, color = sr_color)
 
 // 롱 시그널 단기 중기 장기 순이다.
 // EMA_long_signal = ta.crossover(EMA_medium, EMA_long)
@@ -47,6 +47,28 @@ EMA_plus = (EMA_short >= EMA_medium) and (EMA_medium >= EMA_long)
 EMA_minus = (EMA_short <= EMA_medium) and (EMA_medium <= EMA_long)
 // plotshape(series = EMA_plus, location = location.belowbar, style = shape.labelup, color = color.rgb(76, 175, 79, 50) , text = "+", size = size.auto, textcolor = color.white)
 // plotshape(series = EMA_minus, location = location.abovebar, style = shape.labeldown, color = color.rgb(255, 82, 82, 50) , text = "-", size = size.auto, textcolor = color.white)
+
+
+/////////////////////////// Keltner Channels ///////////////////////////
+
+length = input.int(20, minval=1)
+mult = input(2.0, "Multiplier")
+src = input(close, title="Source")
+exp = input(true, "Use Exponential MA")
+BandsStyle = input.string("Average True Range", options = ["Average True Range", "True Range", "Range"], title="Bands Style")
+atrlength = input(10, "ATR Length")
+esma(source, length)=>
+	s = ta.sma(source, length)
+	e = ta.ema(source, length)
+	exp ? e : s
+ma = esma(src, length)
+rangema = BandsStyle == "True Range" ? ta.tr(true) : BandsStyle == "Average True Range" ? ta.atr(atrlength) : ta.rma(high - low, length)
+upper = ma + rangema * mult
+lower = ma - rangema * mult
+u = plot(upper, color=#2962FF, title="Upper")
+plot(ma, color=#2962FF, title="Basis")
+l = plot(lower, color=#2962FF, title="Lower")
+fill(u, l, color=color.rgb(33, 150, 243, 95), title="Background")
 
 
 /////////////////////////// 공통 시그널 ///////////////////////////
