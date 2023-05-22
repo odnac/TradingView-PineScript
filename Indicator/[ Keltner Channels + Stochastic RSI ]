@@ -1,0 +1,63 @@
+//@version=5
+indicator("[ Keltner Channels + Stochastic RSI ]", overlay = true, timeframe="", timeframe_gaps=true)
+
+
+//////////////////////////// Keltner Channels ////////////////////////////
+
+KC_length = input.int(20, minval=1)
+KC_mult = input(2.0, "Multiplier")
+KC_src = input(close, title="Source")
+KC_exp = input(true, "Use Exponential MA")
+KC_BandsStyle = input.string("Average True Range", options = ["Average True Range", "True Range", "Range"], title="Bands Style")
+KC_atrlength = input(10, "ATR Length")
+KC_esma(KC_source, KC_length)=>
+	s = ta.sma(KC_source, KC_length)
+	e = ta.ema(KC_source, KC_length)
+	KC_exp ? e : s
+KC_ma = KC_esma(KC_src, KC_length)
+KC_rangema = KC_BandsStyle == "True Range" ? ta.tr(true) : KC_BandsStyle == "Average True Range" ? ta.atr(KC_atrlength) : ta.rma(high - low, KC_length)
+KC_upper = KC_ma + KC_rangema * KC_mult
+KC_lower = KC_ma - KC_rangema * KC_mult
+KC_u = plot(KC_upper, color=color.rgb(33, 149, 243, 95), title="Upper")
+plot(KC_ma, color=color.rgb(33, 149, 243, 95), title="Basis")
+KC_l = plot(KC_lower, color=color.rgb(33, 149, 243, 95), title="Lower")
+
+
+//////////////////////////// Stochastic RSI ////////////////////////////
+
+S_RSI_smoothK = input.int(3, "K", minval=1)
+S_RSI_smoothD = input.int(3, "D", minval=1)
+S_RSI_lengthRSI = input.int(14, "RSI Length", minval=1)
+S_RSI_lengthStoch = input.int(14, "Stochastic Length", minval=1)
+S_RSI_src = input(close, title="RSI Source")
+S_RSI_rsi1 = ta.rsi(S_RSI_src, S_RSI_lengthRSI)
+S_RSI_k = ta.sma(ta.stoch(S_RSI_rsi1, S_RSI_rsi1, S_RSI_rsi1, S_RSI_lengthStoch), S_RSI_smoothK)
+S_RSI_d = ta.sma(S_RSI_k, S_RSI_smoothD)
+
+
+//////////////////////////// Signal ////////////////////////////
+
+// 스토캐스틱 RSI 시그널 signal
+S_RSI_long_signal = S_RSI_k <= 20 and S_RSI_d <= 20
+S_RSI_short_signal = S_RSI_k >= 80 and S_RSI_d >= 80
+
+// 켈트너 채널 시그널 signal
+KC_long_signal = close <= KC_lower
+KC_short_signal = close >= KC_upper
+
+bgcolor(S_RSI_long_signal and KC_long_signal ? color.rgb(255, 255, 255, 95) : na) 
+bgcolor(S_RSI_short_signal and KC_short_signal ? color.rgb(255, 255, 255, 95) : na) 
+
+KC_long_signal := ta.crossover(close, KC_lower)
+KC_short_signal := ta.crossunder(close, KC_upper)
+
+
+// 공통 시그널
+du_long_signal = S_RSI_long_signal and KC_long_signal
+du_short_signal = S_RSI_short_signal and KC_short_signal
+
+// bgcolor(du_long_signal ? color.rgb(76, 175, 79, 85) : na) 
+// bgcolor(du_short_signal ? color.rgb(255, 82, 82, 85) : na) 
+
+bgcolor(du_long_signal ? color.rgb(255, 255, 255, 75) : na) 
+bgcolor(du_short_signal ? color.rgb(255, 255, 255, 74) : na) 
