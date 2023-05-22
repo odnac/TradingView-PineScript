@@ -49,28 +49,6 @@ EMA_minus = (EMA_short <= EMA_medium) and (EMA_medium <= EMA_long)
 // plotshape(series = EMA_minus, location = location.abovebar, style = shape.labeldown, color = color.rgb(255, 82, 82, 50) , text = "-", size = size.auto, textcolor = color.white)
 
 
-/////////////////////////// Keltner Channels ///////////////////////////
-
-length = input.int(20, minval=1)
-mult = input(2.0, "Multiplier")
-src = input(close, title="Source")
-exp = input(true, "Use Exponential MA")
-BandsStyle = input.string("Average True Range", options = ["Average True Range", "True Range", "Range"], title="Bands Style")
-atrlength = input(10, "ATR Length")
-esma(source, length)=>
-	s = ta.sma(source, length)
-	e = ta.ema(source, length)
-	exp ? e : s
-ma = esma(src, length)
-rangema = BandsStyle == "True Range" ? ta.tr(true) : BandsStyle == "Average True Range" ? ta.atr(atrlength) : ta.rma(high - low, length)
-upper = ma + rangema * mult
-lower = ma - rangema * mult
-u = plot(upper, color=#2962FF, title="Upper")
-plot(ma, color=#2962FF, title="Basis")
-l = plot(lower, color=#2962FF, title="Lower")
-fill(u, l, color=color.rgb(33, 150, 243, 95), title="Background")
-
-
 /////////////////////////// 공통 시그널 ///////////////////////////
 
 // 정배열 역배열 + 수퍼트렌드
