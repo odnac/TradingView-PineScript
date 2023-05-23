@@ -1,5 +1,5 @@
 //@version=5
-indicator("[ Supertrend + EMA + Keltner Channels + Stochastic RSI + turtle + RSI + BB]", shorttitle = "A", overlay = true)
+indicator("[ Supertrend + EMA + Keltner Channels + Stochastic RSI + turtle + RSI + BB + ATR ]", shorttitle = "A", overlay = true)
 
 
 /////////////////////////// Supertrend ///////////////////////////
@@ -154,6 +154,19 @@ BB_offset = input.int(0, "Offset", minval = -500, maxval = 500)
 plot(BB_mid_line, "Basis", color=color.rgb(255, 165, 0, 70), offset = BB_offset, style = plot.style_stepline)
 plot(BB_upper_line, "Upper", color=color.rgb(255, 255, 255, 70), offset = BB_offset, style = plot.style_stepline)
 plot(BB_lower_line, "Lower", color=color.rgb(255, 255, 255, 70 ), offset = BB_offset, style = plot.style_stepline)
+
+
+///////////////////////////////////////////////// ATR /////////////////////////////////////////////////
+
+ATR_length = input.int(title="Length", defval=14, minval=1)
+// plot(ta.ema(ta.tr(true), ATR_length),  title = "ATR", color=color.new(#B71C1C, 0), style = plot.style_steplinebr)
+
+// 손절라인
+long_lose_line = close - 2 * ta.ema(ta.tr(true), ATR_length)
+short_lose_line = close + 2 * ta.ema(ta.tr(true), ATR_length)
+plot(long_lose_line, color=color.green, style = plot.style_steplinebr)
+plot(short_lose_line, color=color.red, style = plot.style_steplinebr)
+
 
 ////////////////////////////////////// Signal //////////////////////////////////////
 
