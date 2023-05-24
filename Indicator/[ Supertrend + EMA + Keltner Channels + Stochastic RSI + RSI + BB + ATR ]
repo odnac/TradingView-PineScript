@@ -157,10 +157,6 @@ plot(short_lose_line, color=color.rgb(255, 255, 255, 90), style = plot.style_ste
 
 ////////////////////////////////////// Signal //////////////////////////////////////
 
-// 정배열 역배열 + 수퍼트렌드 // 정배열+상방슈퍼트렌드 : 초록, 역배열+하방슈퍼트렌드 : 빨강
-// bgcolor(St_long_signal and EMA_plus ? color.rgb(76, 175, 79, 95) : na)    // 롱 초록
-// bgcolor(St_short_signal and EMA_minus ? color.rgb(255, 82, 82, 97) : na)    // 숏 빨강
-
 // 스토캐스틱RSI + 켈트너 채널 // 스토캐스틱RSI 과매수 과매도 & 켈트너 채널 상하방 뚫었을 때 흰배경으로 표시
 bgcolor(S_RSI_long_signal and KC_long_signal ? color.rgb(255, 255, 255, 95) : na) 
 bgcolor(S_RSI_short_signal and KC_short_signal ? color.rgb(255, 255, 255, 95) : na) 
@@ -184,24 +180,3 @@ BB_SRSI_short_signal = S_RSI_short_signal and BB_short_signal
 
 plotshape(series = BB_SRSI_long_signal, location = location.belowbar, style = shape.circle, color = color.white , size = size.tiny)
 plotshape(series = BB_SRSI_short_signal, location = location.abovebar, style = shape.circle, color = color.white , size = size.tiny)
-
-// 역추세 시그널 // 슈퍼트렌드와 이평 롱(숏)일 때, 스토캐스틱RSI와 켈트너 크로스오버(크로스언더)
-// long = St_short_signal and EMA_minus and KC_long_signal and S_RSI_long_signal
-// short = St_long_signal and EMA_plus and KC_short_signal and S_RSI_short_signal
-
-// bgcolor(long ? color.rgb(255, 255, 255, 95) : na) 
-// bgcolor(short ? color.rgb(255, 255, 255, 95) : na) 
-
-// plotshape(series = long, location = location.belowbar, style = shape.labeldown, color = color.rgb(76, 175, 79, 50) , text = "+", size = size.auto, textcolor = color.white)
-// plotshape(series = short, location = location.abovebar, style = shape.labelup, color = color.rgb(255, 82, 82, 50) , text = "-", size = size.auto, textcolor = color.white)
-
-// 추세 매매 //
-// 슈퍼&정배열 k > d and d > rsi and rsi > rsi_ma 이면서 turtle 매수 떴을때 롱
-// 슈퍼&역배열 k < d and d < rsi and rsi < rsi_ma 이면서 turtle 매도 떴을때 숏
-// trend_long = St_long_signal and EMA_plus and S_RSI_k > S_RSI_d and S_RSI_d > rsi and rsi > rsiMA and turtle_long_signal_20 and S_RSI_k > S_RSI_k[1] and S_RSI_d > S_RSI_d[1] and rsi > rsi[1] and rsiMA > rsiMA[1]
-// trend_short = St_short_signal and EMA_minus and S_RSI_d > S_RSI_k and S_RSI_k < rsi and rsi < rsiMA and turtle_short_signal_20 and  S_RSI_k < S_RSI_k[1] and S_RSI_d < S_RSI_d[1] and rsi < rsi[1] and rsiMA < rsiMA[1]
-
-
-
-// plotshape(series = trend_long, location = location.belowbar, style = shape.labelup, color = color.rgb(76, 175, 79, 50) , text = "🐢", size = size.auto, textcolor = color.white)
-// plotshape(series = trend_short, location = location.abovebar, style = shape.labeldown, color = color.rgb(255, 82, 82, 50) , text = "🐢", size = size.auto, textcolor = color.white)
