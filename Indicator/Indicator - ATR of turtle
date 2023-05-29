@@ -1,0 +1,18 @@
+//@version=5
+indicator("ATR of turtle", shorttitle = "ATR")
+
+float sum = 0 // -20~-1D tr sum
+float avg = 0.0 // -20~-1D atr
+float tr_now = 0.0 // today tr
+float atr = 0.0 // turtle atr // ( 전날 atr * 19 + 당일 tr * 2 ) / 21
+
+// the night before atr 
+for i = 20 to 1
+    sum := high[i] - low[i] > high[i] - close[i+1] ? ( high[i] - low[i] > low[i] - close[i+1]  ? high[i] - low[i]  : low[i] - close[i+1]) : ( high[i] - close[i+1] > low[i] - close[i+1] ? high[i] - close[i+1] : low[i] - close[i+1]) + sum
+
+avg := sum / 20
+
+tr_now := high - low > high - close[1] ? ( high - low > low - close[1]  ? high - low  : low - close[1]) : ( high - close[1] > low - close[1] ? high - close[1] : low - close[1])
+atr := (avg * 19 + tr_now * 2) / 21
+
+plot(atr)
