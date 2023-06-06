@@ -1,7 +1,7 @@
 //@version=5
 //@strategy_alert_message {{strategy.order.alert_message}}
 import dokang/POA/8 as POA
-password = "lee48026746"
+password = ""
 
 // 시작시간, 종료시간 설정
 start_time = input.time(timestamp("2017-10-01T00:00:00+00:00"), title="자동매매 시작")
@@ -11,7 +11,7 @@ in_trade = POA.in_trade(start_time, end_time)
 bgcolor(in_trade ? color.rgb(83, 107, 173, 94) : na)
 
 // 전략스크립트
-strategy("[실매매] UPbit turtle long (1, BTC)",
+strategy("[long] UPbit BTC",
  overlay = true,
  // process_orders_on_close = true,
  initial_capital = 1000,
@@ -33,8 +33,8 @@ is_exit = strategy.position_avg_price * ( ( 100 - long_sl ) / 100 )
 // if in_trade 안에서 진입/종료 작성
 if in_trade
     if is_long
-        strategy.entry("UPbit BTCUSDT.P long", strategy.long, alert_message = POA.entry_message(password))
+        strategy.entry("UPbit BTC long", strategy.long, alert_message = POA.entry_message(password))
     if is_exit
-        strategy.exit("exit", "UPbit BTCUSDT.P long", stop = is_exit, alert_message = POA.exit_message(password))
+        strategy.exit("exit", "UPbit BTC long", stop = is_exit, alert_message = POA.exit_message(password))
     if is_long_close
-        strategy.close("UPbit BTCUSDT.P long", alert_message = POA.close_message(password, percent = 100))
+        strategy.close("UPbit BTC long", alert_message = POA.close_message(password, percent = 100))
