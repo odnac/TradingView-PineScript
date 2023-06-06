@@ -4,7 +4,7 @@ import dokang/POA/8 as POA
 password = ""
 
 // 시작시간, 종료시간 설정
-start_time = input.time(timestamp("2019-08-01T00:00:00+00:00"), title="자동매매 시작")
+start_time = input.time(timestamp("2019-08-01T00:00:00+09:00"), title="자동매매 시작")
 end_time = input.time(timestamp("2050-06-01T13:27:00+09:00"), title="자동매매 종료")
 
 in_trade = POA.in_trade(start_time, end_time)
