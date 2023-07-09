@@ -1,0 +1,62 @@
+//@version=5
+//@strategy_alert_message {{strategy.order.alert_message}}
+import dokang/POA/9 as POA
+password = ""
+
+// 시작시간, 종료시간 설정
+start_time = input.time(timestamp("2023-07-02T13:43:00+09:00"), title="자동매매 시작")          // 기간 확인해!         앨러트에서 기간 늘려!
+end_time = input.time(timestamp("2050-07-02T13:42:00+09:00"), title="자동매매 종료")            // 기간 확인해!
+
+in_trade = POA.in_trade(start_time, end_time)
+bgcolor(in_trade ? color.rgb(83, 107, 173, 94) : na)
+
+
+// 전략스크립트
+strategy("[비트겟 BTCUSDT.P] MACD I",
+ overlay = true,
+ process_orders_on_close = true,
+ initial_capital = 3000,                                                                        //// 초기 자금 자동으로 레버리지 곱해서 들어감 
+ default_qty_type = strategy.cash,                                                              //// 고정 금액으로 들어가기
+ default_qty_value = 1200)                                                                      //// 레버리지를 곱한 금액을 써야함 500이면 2000써야함
+
+// 전략 알고리즘 작성
+fast_length = input(title="Fast Length", defval=12)
+slow_length = input(title="Slow Length", defval=26)
+src = input(title="Source", defval=close)
+signal_length = input.int(title="Signal Smoothing",  minval = 1, maxval = 50, defval = 9)
+sma_source = input.string(title="Oscillator MA Type",  defval="EMA", options=["SMA", "EMA"])
+sma_signal = input.string(title="Signal Line MA Type", defval="EMA", options=["SMA", "EMA"])
+// Plot colors
+col_macd = input(#2962FF, "MACD Line  ", group="Color Settings", inline="MACD")
+col_signal = input(#FF6D00, "Signal Line  ", group="Color Settings", inline="Signal")
+col_grow_above = input(#26A69A, "Above   Grow", group="Histogram", inline="Above")
+col_fall_above = input(#B2DFDB, "Fall", group="Histogram", inline="Above")
+col_grow_below = input(#FFCDD2, "Below Grow", group="Histogram", inline="Below")
+col_fall_below = input(#FF5252, "Fall", group="Histogram", inline="Below")
+// Calculating
+fast_ma = sma_source == "SMA" ? ta.sma(src, fast_length) : ta.ema(src, fast_length)
+slow_ma = sma_source == "SMA" ? ta.sma(src, slow_length) : ta.ema(src, slow_length)
+macd = fast_ma - slow_ma
+signal = sma_signal == "SMA" ? ta.sma(macd, signal_length) : ta.ema(macd, signal_length)
+hist = macd - signal
+
+is_long = ta.crossover(fast_ma, slow_ma) and macd > 0
+long_sl = input(2, "손절 (%))")
+is_long_exit = strategy.position_avg_price * ( ( 100 - long_sl ) / 100 )
+
+is_short = ta.crossunder(fast_ma, slow_ma) and macd < 0
+short_sl = input(2, "손절 (%))")
+is_short_exit = strategy.position_avg_price * ( ( 100 + short_sl ) / 100 )
+
+// if in_trade 안에서 진입/종료 작성
+if in_trade
+    if is_long
+        strategy.entry("[비트겟 BTCUSDT.P] MACD long", strategy.long, alert_message = POA.entry_message(password))
+    if is_long_exit
+        strategy.exit("exit", "[비트겟 BTCUSDT.P] MACD long", stop = is_long_exit, alert_message = POA.exit_message(password))
+
+
+    if is_short
+        strategy.entry("[비트겟 BTCUSDT.P] MACD short", strategy.short, alert_message = POA.entry_message(password))
+    if is_short_exit
+        strategy.exit("exit", "[비트겟 BTCUSDT.P] MACD short", stop = is_short_exit, alert_message = POA.exit_message(password))

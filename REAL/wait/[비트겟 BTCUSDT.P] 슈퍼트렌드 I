@@ -1,0 +1,63 @@
+//@version=5
+//@strategy_alert_message {{strategy.order.alert_message}}
+import dokang/POA/9 as POA
+password = ""
+
+// 시작시간, 종료시간 설정
+start_time = input.time(timestamp("2023-07-02T13:43:00+09:00"), title="자동매매 시작")          // 기간 확인해!         앨러트에서 기간 늘려!
+end_time = input.time(timestamp("2050-07-02T13:42:00+09:00"), title="자동매매 종료")            // 기간 확인해!
+
+in_trade = POA.in_trade(start_time, end_time)
+bgcolor(in_trade ? color.rgb(83, 107, 173, 94) : na)
+
+
+// 전략스크립트
+strategy("[비트겟 BTCUSDT.P] 슈퍼트렌드 I",
+ overlay = true,
+ process_orders_on_close = true,
+ initial_capital = 3000,                                                                        //// 초기 자금 자동으로 레버리지 곱해서 들어감 
+ default_qty_type = strategy.cash,                                                              //// 고정 금액으로 들어가기
+ default_qty_value = 800)                                                                      //// 레버리지를 곱한 금액을 써야함 500이면 2000써야함
+
+// 전략 알고리즘 작성
+atrPeriod1 = input(10, "ATR Length")
+factor1 = input.float(3.0, "Factor", step = 0.01)
+
+[supertrend1, direction1] = ta.supertrend(factor1, atrPeriod1)
+
+bodyMiddle = plot((open + close) / 2, display=display.none)
+upTrend = plot(direction1 < 0 ? supertrend1 : na, "Up Trend", color = color.green, style=plot.style_linebr)
+downTrend = plot(direction1 < 0? na : supertrend1, "Down Trend", color = color.red, style=plot.style_linebr)
+
+fill(bodyMiddle, upTrend, color.new(color.green, 90), fillgaps=false)
+fill(bodyMiddle, downTrend, color.new(color.red, 90), fillgaps=false)
+
+
+///////////////////////////
+
+atrPeriod = input(10, "ATR Length")
+factor = input.float(3.0, "Factor", step = 0.01)
+
+[_, direction] = ta.supertrend(factor, atrPeriod)
+
+is_long = (direction) < 0
+long_sl = input(2, "롱 손절 (%))")
+is_long_exit = strategy.position_avg_price * ( ( 100 - long_sl ) / 100 )
+
+is_short = (direction) > 0
+short_sl = input(2, "숏 손절 (%))")
+is_short_exit = strategy.position_avg_price * ( ( 100 - short_sl ) / 100 )
+
+
+// if in_trade 안에서 진입/종료 작성
+if in_trade
+    if is_long
+        strategy.entry("[비트겟 BTCUSDT.P] 슈퍼트렌드 long", strategy.long, alert_message = POA.entry_message(password))
+    if is_long_exit
+        strategy.exit("exit", "[비트겟 BTCUSDT.P] 슈퍼트렌드 long", stop = is_long_exit, alert_message = POA.exit_message(password))
+
+
+    if is_short
+        strategy.entry("[비트겟 BTCUSDT.P] 슈퍼트렌드 short", strategy.short, alert_message = POA.entry_message(password))
+    if is_short_exit
+        strategy.exit("exit", "[비트겟 BTCUSDT.P] 슈퍼트렌드 short", stop = is_short_exit, alert_message = POA.exit_message(password))
