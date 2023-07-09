@@ -1,0 +1,60 @@
+//@version=5
+//@strategy_alert_message {{strategy.order.alert_message}}
+// ************************************** POA ************************************** //
+import dokang/POA/9 as POA
+
+// 시작시간, 종료시간 설정
+start_time = input.time(timestamp("2023-07-04T00:00:00+09:00"), title="자동매매 시작")          /// 날짜 수정하고 앨러트 기간
+end_time = input.time(timestamp("2050-07-03T00:57:00+09:00"), title="자동매매 종료")
+
+// 포아봇 설정
+pstrategy = POA.bot.new("", start_time, end_time, leverage = 4)                      //// 비밀번호 레버리지 확인
+pstrategy.start_trade()
+// ********************************************************************************* //
+// 전략스크립트
+strategy("[비트겟 ETHUSDT.P] 터틀 C",
+ overlay = true,
+ process_orders_on_close = true,
+ initial_capital = 500,                                                                        //// 초기 자금 자동으로 레버리지 곱해서 들어감 
+ default_qty_type = strategy.percent_of_equity,                                                            
+ default_qty_value = 100)                                                                    
+
+// 전략 알고리즘 작성
+long_enter = input(10, "진입 조건")
+long_clean = input(5, "청산 조건")
+long_sl = input(2, "손절 (%))")
+
+short_enter = input(20, "진입 조건")
+short_clean = input(10, "청산 조건")
+short_sl = input(2, "손절 (%))")
+
+standard_long_enter = ta.highest(close, long_enter)[1]
+standard_long_close = ta.lowest(close, long_clean)[1]
+
+standard_short_enter = ta.lowest(close, short_enter)[1]
+standard_short_close = ta.highest(close, short_clean)[1]
+
+plot(standard_long_enter, color = color.white)
+plot(standard_short_enter, color = color.white)
+
+is_long = ta.crossover(close, standard_long_enter)
+is_long_close = ta.crossunder(close, standard_long_close)
+is_long_exit = strategy.position_avg_price * ( ( 100 - long_sl ) / 100 )
+
+is_short = ta.crossunder(close, standard_short_enter)
+is_short_close = ta.crossover(close, standard_short_close)
+is_short_exit = strategy.position_avg_price * ( ( 100 + long_sl ) / 100 )
+
+if is_long
+    pstrategy.entry("[비트겟 ETHUSDT.P] 터틀 long", "strategy.long")
+if is_long_exit
+    pstrategy.exit("exit", "[비트겟 ETHUSDT.P] 터틀 long", stop = is_long_exit)
+if is_long_close
+    pstrategy.close("[비트겟 ETHUSDT.P] 터틀 long")
+
+if is_short
+    pstrategy.entry("[비트겟 ETHUSDT.P] 터틀 short", "strategy.short")
+if is_short_exit
+    pstrategy.exit("exit", "[비트겟 ETHUSDT.P] 터틀 short", stop = is_short_exit)
+if is_short_close
+    pstrategy.close("[비트겟 ETHUSDT.P] 터틀 short")

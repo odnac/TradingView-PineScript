@@ -1,0 +1,45 @@
+//@version=5
+//@strategy_alert_message {{strategy.order.alert_message}}
+// ************************************** POA ************************************** //
+import dokang/POA/10 as POA
+
+// 시작시간, 종료시간 설정
+start_time = input.time(timestamp("2023-07-01T00:00:00+09:00"), title="자동매매 시작")             // 시간 바꿔
+end_time = input.time(timestamp("2050-07-10T01:39:00+09:00"), title="자동매매 종료")
+
+// 포아봇 설정
+pstrategy = POA.bot.new("", start_time, end_time, leverage = 4)                          // 비밀번호 레버리지 바꿔
+pstrategy.start_trade()
+// ********************************************************************************* //
+
+strategy("[바낸 BTCUSDT.P] 지지저항-돌파 C", 
+ overlay = true,
+ process_orders_on_close = true,
+ initial_capital = 600,                                                                        //// 초기 자금 자동으로 레버리지 곱해서 들어감             앨러트에서 기간 늘려!
+ default_qty_type = strategy.percent_of_equity,                                                             
+ default_qty_value = 100)    
+
+input_left = input(10, "왼쪽")
+input_right = input(10, "오른쪽")
+input_offset = input(-10, "offset")
+
+resistance_line = fixnan(ta.pivothigh(close, input_left, input_right)[1])     // 좌우 20개봉 최고가
+support_line = fixnan(ta.pivotlow(close, input_left, input_right)[1])         // 좌우 20개봉 최저가
+
+plot(resistance_line, color = ta.change(resistance_line) ? na : #FF0000,  linewidth=3, offset=input_offset, title="Resistance")
+plot(support_line, color = ta.change(support_line) ? na : #233dee,  linewidth=3, offset=input_offset, title="Support")
+
+// 매매 조건
+long_sl = input(2.0, "롱 손절 (%))")
+is_long = ta.crossover(close, resistance_line)  // 저항 돌파
+is_long_close = close < resistance_line         // 다음 저항선 만나면 종료
+is_long_exit = strategy.position_avg_price * ( ( 100 - long_sl ) / 100 )
+
+if is_long
+    pstrategy.entry("[바낸 BTCUSDT.P] 지지저항-돌파", "strategy.long")
+
+if is_long_close
+    pstrategy.close("[바낸 BTCUSDT.P] 지지저항-돌파")
+
+if is_long_exit
+    pstrategy.exit("exit", "[바낸 BTCUSDT.P] 지지저항-돌파", stop = is_long_exit)

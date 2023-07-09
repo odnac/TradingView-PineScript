@@ -1,0 +1,45 @@
+//@version=5
+//@strategy_alert_message {{strategy.order.alert_message}}
+// ************************************** POA ************************************** //
+import dokang/POA/9 as POA
+
+// 시작시간, 종료시간 설정
+start_time = input.time(timestamp("2023-07-06T00:00:00+09:00"), title="자동매매 시작")                              // 시간 바꿔            앨러트 바꿔
+end_time = input.time(timestamp("2050-07-07T13:04:00+09:00"), title="자동매매 종료")                                // 시간 바꿔
+
+// 포아봇 설정
+pstrategy = POA.bot.new("", start_time, end_time, leverage = 4)                                          // 비밀번호 레버리지 바꿔
+pstrategy.start_trade()
+// ********************************************************************************* //
+
+strategy("[바낸 BTCUSDT.P] 지지저항-박스 C", 
+ overlay = true,
+ process_orders_on_close = true,
+ initial_capital = 500,                                                                        //// 초기 자금 자동으로 레버리지 곱해서 들어감             앨러트에서 기간 늘려!
+ default_qty_type = strategy.percent_of_equity,                                                             
+ default_qty_value = 100)    
+
+input_left = input(20, "왼쪽")
+input_right = input(20, "오른쪽")
+input_offset = input(-20, "offset")
+
+line1 = ta.pivothigh(close, input_left, input_right)
+line2 = ta.pivotlow(close, input_left, input_right)
+
+plot(line1, style = plot.style_steplinebr, offset = input_offset, color = color.red, linewidth = 2)
+plot(line2, style = plot.style_steplinebr, offset = input_offset, color = color.green, linewidth = 2)
+
+// 매매 조건
+long_sl = input(10, "롱 손절 (%))")
+is_long = close > line2
+is_long_close = close < line1
+is_long_exit = strategy.position_avg_price * ( ( 100 - long_sl ) / 100 )
+
+if is_long
+    pstrategy.entry("[바낸 BTCUSDT.P] 지지저항-박스", "strategy.long")
+
+if is_long_exit
+    pstrategy.exit("exit", "[바낸 BTCUSDT.P] 지지저항-박스", stop = is_long_exit)
+
+if is_long_close
+    pstrategy.close("[바낸 BTCUSDT.P] 지지저항-박스")
