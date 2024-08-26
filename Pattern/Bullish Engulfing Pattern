@@ -1,6 +1,10 @@
 //@version=5
-indicator("Bullish Engulfing Pattern", overlay=true)
+indicator("Bullish Engulfing Pattern", overlay = true)
 
-bullishEngulfing = (close[1] < open[1]) and (close > open) and (close > open[1]) and (open < close[1])
+// Identify Bullish Engulfing Pattern
+isBullishEngulfing = open[1] > close[1] and close[1] >= open and close > open[1] and close > open 
 
-plotshape(series=bullishEngulfing, location=location.belowbar, color=color.green, style=shape.labelup, title="Bullish Engulfing", text="BE")
+add_cond = high[1] - low[1] < high - low and high > high[1]
+
+// Plot Bullish Engulfing Pattern
+plotshape(isBullishEngulfing and add_cond, location=location.belowbar, color=color.green, style=shape.labelup, title="Bullish Engulfing")

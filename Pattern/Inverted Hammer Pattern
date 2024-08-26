@@ -1,0 +1,6 @@
+//@version=5
+indicator("Inverted Hammer", overlay=true)
+
+isInvertedHammer = (close > open) and ((high - low) > 2 * (close - open)) and ((high - close) / (.001 + high - low) > 0.6)
+
+plotshape(series=isInvertedHammer, location=location.abovebar, color=color.green, style=shape.labeldown, text="Inv Hammer")

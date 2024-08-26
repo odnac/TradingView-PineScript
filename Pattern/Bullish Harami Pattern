@@ -1,0 +1,6 @@
+//@version=5
+indicator("Bullish Harami", overlay=true)
+
+isBullishHarami = (close > open) and (close[1] < open[1]) and (open <= close[1]) and (close > open[1])
+
+plotshape(series=isBullishHarami, location=location.belowbar, color=color.green, style=shape.labelup, text="B H")
