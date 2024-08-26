@@ -1,0 +1,26 @@
+//@version=5
+indicator("Number of bullish candles in the last N candles", overlay=false)
+
+N = input(50, "N length")
+
+// 양봉 개수를 저장할 배열 생성
+var int[] bullishCounts = array.new_int(0)
+
+// 현재 구간의 양봉 개수 초기화
+var int currentBullishCount = 0
+
+// 50개 봉마다 양봉 개수 계산
+if bar_index >= (N - 1)
+    currentBullishCount := 0
+    for i = 0 to (N - 1)
+        if close[i] > open[i]
+            currentBullishCount := currentBullishCount + 1
+    array.push(bullishCounts, currentBullishCount)
+
+// 배열의 마지막 값을 전역 변수로 저장
+var int lastBullishCount = na
+if array.size(bullishCounts) > 0
+    lastBullishCount := array.get(bullishCounts, array.size(bullishCounts) - 1)
+
+// 전역 변수 값을 plot
+plot(lastBullishCount, title = "Number of bullish candles in the last N candles", color = color.green)

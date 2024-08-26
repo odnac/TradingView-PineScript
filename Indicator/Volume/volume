@@ -1,0 +1,18 @@
+//@version=5
+indicator("volume", format = format.volume)
+
+volume_length = input(50, "length")
+
+volume_line = ta.sma(volume, volume_length)
+
+volume_color = color.rgb(76, 175, 79, 60)
+volume_color := if(close > open)
+    color.rgb(76, 175, 79, 60)
+else
+    if(close < open)
+        color.rgb(255, 82, 82, 60)
+    else
+        volume_color[1]
+
+plot(volume, style = plot.style_columns, color = volume_color)
+plot(volume_line, color = color.white)
