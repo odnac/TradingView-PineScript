@@ -1,0 +1,34 @@
+//@version=5
+indicator("position size (atr)")
+
+IC = input(1600, "init_capital")
+LEVER = input(20.0, "leverage")
+SL = input(2.0, "stop_loss(%)")
+
+////////// fix stop_loss ////////// 
+fix_position_size = IC / LEVER // 한 포지션 최대 투자 가능 금액
+// plot(fix_position_size , "fix_ size(usdt)", color.green)
+// plot(fix_position_size * LEVER, "leverage * fix_ size(usdt)", color.green)
+
+////////// ATR ////////// 
+atr_length = input.int(title="ATR_Length", defval=24, minval=1)
+pine_atr(length) =>
+    trueRange = na(high[1])? high-low : math.max(math.max(high - low, math.abs(high - close[1])), math.abs(low - close[1]))
+    ta.ema(trueRange, length)
+
+atr_val = pine_atr(atr_length)
+atr_SL = (2 * atr_val)  * 100 / close
+
+plot(atr_SL , "atr_ stop loss(%)", color.red)
+plot(atr_SL * LEVER, "atr_ stop loss(%) * LEVER", color.red)
+
+////////// entry position_size == IC 2% ////////// 
+total_fund_2 = IC * ( SL / 100 )
+plot(series = total_fund_2, title = "2% of total funds", color = color.white)
+plot(series = total_fund_2 * LEVER, title = "2% of total funds * LEVER", color = color.white)
+
+////////// entry loss size == IC 2% ////////// 
+atr_position_size = IC * (SL / 100) / (atr_SL / 100) / LEVER 
+// plot(atr_position_size  , "atr_ size(usdt)", color.green)
+// plot(atr_position_size * LEVER, "atr_ size(usdt) * LEVER", color.green)
+

@@ -1,0 +1,33 @@
+//@version=5
+indicator("RSI") //overlay = true, scale =  scale.right
+
+// input
+rsi_high_line = input.int(70, minval = 50, maxval = 100)
+rsi_low_line = input.int(30, minval = 0, maxval = 50)
+rsi_period = input.int(14, minval=1)
+rsiMA_LengthInput = input.int(14, title="MA Length", group="MA Settings")
+
+// function
+rsi = ta.rsi(close, rsi_period)
+rsiMA = ta.sma(rsi, rsiMA_LengthInput)
+rsi_crossover = ta.crossover(rsi, rsiMA)
+rsi_crossunder = ta.crossunder(rsi, rsiMA)
+
+// draw
+hline(rsi_high_line, color = color.rgb(255, 70, 70, 50), title = "rsi_high")
+hline(50, color = color.rgb(255, 255, 255, 50), title = "rsi_mid")
+hline(rsi_low_line, color = color.rgb(255, 70, 70, 50), title = "rsi_low")
+
+plot(rsiMA, color=color.rgb(255, 235, 59, 50), title = "rsiMA line")
+
+rsi_plot = plot(rsi, color = color.rgb(255, 255, 255,50), title = "rsi line") 
+
+plot(rsi_high_line, color = color.rgb(255, 70, 70, 50), title = "rsi high line", display = display.none)
+plot(rsi_low_line, color = color.rgb(255, 70, 70, 50), title = "rsi low line", display = display.none)
+
+midLinePlot = plot(50, color = na, editable = false, display = display.none)
+fill(rsi_plot, midLinePlot, 100, 70, top_color = color.new(color.green, 0), bottom_color = color.new(color.green, 100), title = "Overbought Gradient Fill")
+fill(rsi_plot, midLinePlot, 30,  0,  top_color = color.new(color.red, 100), bottom_color = color.new(color.red, 0), title = "Oversold Gradient Fill")
+
+// plot(rsi_crossover ? rsi : na, color = color.rgb(76, 175, 79), style = plot.style_circles, linewidth = 2)
+// plot(rsi_crossunder ? rsi : na, color = color.rgb(255, 82, 82), style = plot.style_circles, linewidth = 2)
