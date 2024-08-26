@@ -3,12 +3,10 @@
 // ************************************** POA ************************************** //
 import dokang/POA/12 as POA
 
-// 시작시간, 종료시간 설정
-start_time = input.time(timestamp("2024-01-01T00:00:00+09:00"), title="자동매매 시작")
-end_time = input.time(timestamp("2100-08-18T11:37:00+09:00"), title="자동매매 종료")
+start_time = input.time(timestamp("2024-01-01T00:00:00+09:00"), title="start")
+end_time = input.time(timestamp("2100-08-31T01:07:00+09:00"), title="end")
 
-// 포아봇 설정
-pstrategy = POA.bot.new("", start_time, end_time, leverage = )
+pstrategy = POA.bot.new("", start_time, end_time, exit_percent = 100, close_percent = 100)
 pstrategy.start_trade()
 // ********************************************************************************* //
 
@@ -21,13 +19,15 @@ strategy("High Low Breakout(20,10)",
  commission_type = strategy.commission.percent, 
  commission_value = 0.04)
 
+///////////////////////////////////////////// High Low /////////////////////////////////////////////
 long_enter = input(20, "Entry")
 long_close = input(10, "close")
-long_stop = input(2, "손절 (%))")
+long_stop = input(2, "stop (%))")
 
 standard_long_enter = ta.highest(high, long_enter)
 standard_long_close = ta.lowest(low, long_close)
 
+///////////////////////////////////////////// strategy /////////////////////////////////////////////
 is_long = ta.crossover(close, standard_long_enter[1])
 is_long_close = ta.crossunder(close, standard_long_close[1])
 is_long_stop = strategy.position_avg_price * ( ( 100 - long_stop ) / 100 )

@@ -1,0 +1,106 @@
+//@version=5
+//@strategy_alert_message {{strategy.order.alert_message}}
+// ************************************** POA ************************************** //
+import dokang/POA/12 as POA
+
+start_time = input.time(timestamp("2024-01-01T00:00:00+09:00"), title="start")
+end_time = input.time(timestamp("2100-08-31T01:07:00+09:00"), title="end")
+
+pstrategy = POA.bot.new("", start_time, end_time, exit_percent = 100, close_percent = 100)
+pstrategy.start_trade()
+// ********************************************************************************* //
+
+strategy("Donchian Larry 1h",
+ overlay=true, 
+ initial_capital = 80, 
+ default_qty_type = strategy.percent_of_equity, 
+ default_qty_value = 100, 
+ process_orders_on_close = true,  
+ commission_type = strategy.commission.percent, 
+ commission_value = 0.045)
+
+///////////////////////////////////////////// input /////////////////////////////////////////////
+long_sl = input(2.0, "long stop (%))")
+ST_multiple = input(2.0, "Stop Multiple")
+
+////////////////////////////////////// DC //////////////////////////////////////
+DC_length = input.int(96, minval = 1)
+DC_offset = input.int(0)
+DC_lower =  ta.lowest(DC_length)
+DC_upper =  ta.highest(DC_length)
+DC_basis =  math.avg(DC_upper, DC_lower)
+plot(DC_basis,     "Basis", color = #FF6D00, offset = DC_offset)
+u = plot(DC_upper, "Upper", color = #2962FF, offset = DC_offset)
+l = plot(DC_lower, "Lower", color = #2962FF, offset = DC_offset)
+fill(u, l, color = color.rgb(33, 150, 243, 95), title = "Background")
+
+////////////////////////////////////// LWTI //////////////////////////////////////
+variant(type, src, len) =>
+    sig = 0.0
+    if type == "SMA"
+        sig := ta.sma(src, len) 
+    else if type == "EMA"
+        sig := ta.ema(src, len) 
+    else if type == "WMA"
+        sig := ta.wma(src, len)   
+    else if type == "RMA"
+        sig := ta.rma(src, len)  
+    sig
+    
+per = input.int(25, "Period", group = "Basic Settings")
+smthit = input.bool(false, "Smooth LWPI?", group = "Basic Settings")
+type = input.string("SMA", "Smoothing Type", options = ["EMA", "WMA", "RMA", "SMA"], group = "BasicR Settings")
+smthper = input.int(20, "Smoothing Period", group = "Basic Settings")
+
+colorbars = input.bool(false, "Color bars?", group = "UI Options")
+showsignals = input.bool(false, "Show signals?", group = "UI Options")
+
+ma = ta.sma(close - nz(close[per]), per)
+atr = ta.atr(per)
+out = ma/atr * 50 + 50
+out := smthit ? variant(type, out, smthper) : out
+
+middle = 50
+
+////////////////////////////////////// Volume //////////////////////////////////////
+volume_length = input(30, "volume_length")
+
+volume_line = ta.sma(volume, volume_length)
+
+volume_color = color.rgb(76, 175, 79, 60)
+volume_color := if(close > open)
+    color.rgb(76, 175, 79, 60)
+else
+    if(close < open)
+        color.rgb(255, 82, 82, 60)
+    else
+        volume_color[1]
+
+////////////////////////////////////// var //////////////////////////////////////
+var tp = 0.0
+var clo_bas = 0.0
+var abs_clo_bas = 0.0
+var abs_clo_basX2 = 0.0
+
+///////////////////////////////////////////// strategy /////////////////////////////////////////////
+DC_long = close > DC_upper[1]
+LWTI_long = out > middle // ta.crossover(out, middle)
+volume_long = volume > volume_line
+
+is_long = DC_long and LWTI_long and volume_long
+is_long_close = ta.crossunder(close, DC_basis)
+is_long_exit = strategy.position_avg_price * ( ( 100 - long_sl ) / 100 )
+
+if is_long and strategy.position_size <= 0
+    pstrategy.entry("Donchian Larry 1h", "strategy.long")
+    clo_bas := (close - DC_basis)
+    abs_clo_bas := math.abs(clo_bas)
+    abs_clo_basX2 := ST_multiple * abs_clo_bas
+    tp := close + abs_clo_basX2
+
+plot(tp, color = color.white)
+
+if is_long_close
+    pstrategy.close("Donchian Larry 1h")
+
+pstrategy.exit("exit Donchian Larry 1h", "Donchian Larry 1h", stop = is_long_exit, limit = tp, profit = tp)

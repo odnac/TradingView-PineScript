@@ -3,15 +3,13 @@
 // ************************************** POA ************************************** //
 import dokang/POA/12 as POA
 
-// 시작시간, 종료시간 설정
-start_time = input.time(timestamp("2024-01-01T00:00:00+09:00"), title="자동매매 시작")
-end_time = input.time(timestamp("2100-08-31T01:07:00+09:00"), title="자동매매 종료")
+start_time = input.time(timestamp("2024-01-01T00:00:00+09:00"), title="start")
+end_time = input.time(timestamp("2100-08-31T01:07:00+09:00"), title="end")
 
-// 포아봇 설정
 pstrategy = POA.bot.new("", start_time, end_time, exit_percent = 100, close_percent = 100)
 pstrategy.start_trade()
 // ********************************************************************************* //
-// 전략스크립트
+
 strategy("Donchian Channel Breakout",
  overlay = true,
  process_orders_on_close = true,
