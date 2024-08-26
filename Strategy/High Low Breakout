@@ -1,0 +1,41 @@
+//@version=5
+//@strategy_alert_message {{strategy.order.alert_message}}
+// ************************************** POA ************************************** //
+import dokang/POA/12 as POA
+
+// 시작시간, 종료시간 설정
+start_time = input.time(timestamp("2024-01-01T00:00:00+09:00"), title="자동매매 시작")
+end_time = input.time(timestamp("2100-08-18T11:37:00+09:00"), title="자동매매 종료")
+
+// 포아봇 설정
+pstrategy = POA.bot.new("", start_time, end_time, leverage = )
+pstrategy.start_trade()
+// ********************************************************************************* //
+
+strategy("High Low Breakout(20,10)",
+ overlay = true,
+ process_orders_on_close = true,
+ initial_capital = 600,
+ default_qty_type = strategy.percent_of_equity,
+ default_qty_value = 100,
+ commission_type = strategy.commission.percent, 
+ commission_value = 0.04)
+
+long_enter = input(20, "Entry")
+long_close = input(10, "close")
+long_stop = input(2, "손절 (%))")
+
+standard_long_enter = ta.highest(high, long_enter)
+standard_long_close = ta.lowest(low, long_close)
+
+is_long = ta.crossover(close, standard_long_enter[1])
+is_long_close = ta.crossunder(close, standard_long_close[1])
+is_long_stop = strategy.position_avg_price * ( ( 100 - long_stop ) / 100 )
+
+if is_long
+    pstrategy.entry("High Low Breakout(20,10)", "strategy.long")
+
+if is_long_close
+    pstrategy.close("High Low Breakout(20,10)")
+    
+pstrategy.exit("exit High Low Breakout(20,10)", "High Low Breakout(20,10)", stop =  is_long_stop)

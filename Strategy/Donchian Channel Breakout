@@ -1,0 +1,37 @@
+//@version=5
+//@strategy_alert_message {{strategy.order.alert_message}}
+// ************************************** POA ************************************** //
+import dokang/POA/12 as POA
+
+// 시작시간, 종료시간 설정
+start_time = input.time(timestamp("2024-01-01T00:00:00+09:00"), title="자동매매 시작")
+end_time = input.time(timestamp("2100-08-31T01:07:00+09:00"), title="자동매매 종료")
+
+// 포아봇 설정
+pstrategy = POA.bot.new("", start_time, end_time, exit_percent = 100, close_percent = 100)
+pstrategy.start_trade()
+// ********************************************************************************* //
+// 전략스크립트
+strategy("Donchian Channel Breakout",
+ overlay = true,
+ process_orders_on_close = true,
+ initial_capital = 1000,
+ default_qty_type = strategy.percent_of_equity,
+ default_qty_value = 100)
+
+length = input.int(20, minval = 1)
+offset = input.int(0)
+lower =  ta.lowest(length)
+upper =  ta.highest(length)
+basis =  math.avg(upper, lower)
+plot(basis,     "Basis", color = #FF6D00, offset = offset)
+u = plot(upper, "Upper", color = #2962FF, offset = offset)
+l = plot(lower, "Lower", color = #2962FF, offset = offset)
+
+is_long = ta.crossover(close, upper[1])
+is_long_close = ta.crossunder(close, basis)
+
+if is_long
+    pstrategy.entry("Donchian Channel Breakout", "strategy.long")
+if is_long_close
+    pstrategy.close("Donchian Channel Breakout")
