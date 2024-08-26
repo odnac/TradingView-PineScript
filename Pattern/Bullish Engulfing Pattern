@@ -1,0 +1,6 @@
+//@version=5
+indicator("Bullish Engulfing Pattern", overlay=true)
+
+bullishEngulfing = (close[1] < open[1]) and (close > open) and (close > open[1]) and (open < close[1])
+
+plotshape(series=bullishEngulfing, location=location.belowbar, color=color.green, style=shape.labelup, title="Bullish Engulfing", text="BE")

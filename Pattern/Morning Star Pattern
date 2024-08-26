@@ -1,0 +1,6 @@
+//@version=5
+indicator("Morning Star Pattern", overlay=true)
+
+morningStar = (close[2] < open[2]) and (close[1] < open[1]) and (close[1] > open[2]) and (close > open) and (close > (open[1] + close[1]) / 2)
+
+plotshape(series=morningStar, location=location.belowbar, color=color.green, style=shape.labelup, title="Morning Star", text="MS")

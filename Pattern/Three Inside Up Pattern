@@ -1,0 +1,6 @@
+//@version=5
+indicator("Three Inside Up Pattern", overlay=true)
+
+threeInsideUp = (close[2] < open[2]) and (close[1] > open[1]) and (open[1] > close[2]) and (close[1] < open[2]) and (close > open) and (close > close[1])
+
+plotshape(series=threeInsideUp, location=location.belowbar, color=color.green, style=shape.labelup, title="Three Inside Up", text="TIU")

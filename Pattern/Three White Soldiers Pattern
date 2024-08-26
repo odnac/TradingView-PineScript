@@ -1,0 +1,6 @@
+//@version=5
+indicator("Three White Soldiers Pattern", overlay=true)
+
+threeWhiteSoldiers = (close[2] > open[2]) and (close[1] > open[1]) and (close > open) and (close[2] < close[1]) and (close[1] < close)
+
+plotshape(series=threeWhiteSoldiers, location=location.belowbar, color=color.green, style=shape.labelup, title="Three White Soldiers", text="TWS")

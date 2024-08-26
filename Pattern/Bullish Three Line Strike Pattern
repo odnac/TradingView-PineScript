@@ -1,0 +1,7 @@
+//@version=5
+indicator("Bullish Three Line Strike Pattern", overlay=true)
+
+bullishThreeLineStrike = (close[3] > open[3]) and (close[2] > open[2]) and (close[1] > open[1]) and (close < open) and (close < open[3]) and (open > close[1])
+
+plotshape(series=bullishThreeLineStrike, location=location.belowbar, color=color.green, style=shape.labelup, title="Bullish Three Line Strike", text="BTLS")
+alertcondition(bullishThreeLineStrike, "Bullish Three Line Strike Pattern", "Bullish Three Line Strike Pattern")
