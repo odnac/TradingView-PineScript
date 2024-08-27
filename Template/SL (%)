@@ -1,0 +1,59 @@
+//@version=5
+//@strategy_alert_message {{strategy.order.alert_message}}
+// ************************************** POA ************************************** //
+import dokang/POA/13 as POA
+
+// 시작시간, 종료시간 설정
+start_time = input.time(timestamp("2000-00-00T00:00:00+09:00"), title="자동매매 시작")                            // time
+end_time = input.time(timestamp("2100-12-31T00:00:00+09:00"), title="자동매매 종료")
+
+// 포아봇 설정
+pstrategy = POA.bot.new(, start_time, end_time, leverage = )                                                    // "password" // leverage
+pstrategy.start_trade()
+// ********************************************************************************* //
+
+strategy("SL (%)",
+ overlay = true, 
+ initial_capital = ,                                                                                            // capital
+ default_qty_type = strategy.percent_of_equity, 
+ default_qty_value = 100, 
+ commission_type = strategy.commission.percent, 
+ commission_value = ,                                                                                           // binance 0.045 bitget 0.04 upbit 0.05
+ process_orders_on_close = true)
+
+///////////////////////////////////////////// input /////////////////////////////////////////////
+long_limit = input(2, "롱 익절 (%))")
+long_stop = input(2, "롱 손절 (%))")
+
+short_limit = input(2, "숏 익절 (%))")
+short_stop = input(2, "숏 손절 (%))")
+
+///////////////////////////////////////////// 전략 /////////////////////////////////////////////
+
+///////////////////////////////////////////// 진입 /////////////////////////////////////////////
+is_long = 
+is_long_close = 
+is_long_stop = strategy.position_avg_price * ( ( 100 - long_stop ) / 100 )
+is_long_limit = strategy.position_avg_price * ( ( 100 + long_limit ) / 100 )
+
+is_short = 
+is_short_close = 
+is_short_stop = strategy.position_avg_price * ( ( 100 + short_stop ) / 100 )
+is_short_limit = strategy.position_avg_price * ( ( 100 - short_limit ) / 100 )
+
+if is_long
+    pstrategy.entry("long", "strategy.long")
+
+if is_long_close
+    pstrategy.close("long")
+
+pstrategy.exit("exit", "long", stop = is_long_stop, limit = is_long_limit)
+
+if is_short
+    pstrategy.entry("short", "strategy.short")
+
+if is_short_close
+    pstrategy.close("short", stop = , limit = )
+
+pstrategy.exit("exit", "short", stop = is_short_stop, , limit = is_short_limit)
+

@@ -12,7 +12,7 @@ pstrategy = POA.bot.new(, start_time, end_time, leverage = )                    
 pstrategy.start_trade()
 // ********************************************************************************* //
 
-strategy("템플릿",
+strategy("SL (atr)",
  overlay = true, 
  initial_capital = ,                                                                                            // capital
  default_qty_type = strategy.percent_of_equity, 
@@ -29,19 +29,27 @@ short_limit = input(2, "숏 익절 (%))")
 short_stop = input(2, "숏 손절 (%))")
 
 ///////////////////////////////////////////// 전략 /////////////////////////////////////////////
+atr_multi = input(3.0, "atr multiple")                                                                                            
+atr_length = input.int(title="atr length", defval=14, minval=1)
+atr_up = close + atr_multi * ta.ema(ta.tr(true), atr_length)
+atr_down = close - atr_multi * ta.ema(ta.tr(true), atr_length)
+plot(atr_up) //, style = plot.style_steplinebr)
+plot(atr_down) //, style = plot.style_steplinebr)
 
-///////////////////////////////////////////// 진입 /////////////////////////////////////////////
+///////////////////////////////////////////// s /////////////////////////////////////////////
 is_long = 
 is_long_close = 
-is_long_stop = strategy.position_avg_price * ( ( 100 - long_stop ) / 100 )
-is_long_limit = strategy.position_avg_price * ( ( 100 + long_limit ) / 100 )
+var is_long_stop = 0.0
+var is_long_limit = 0.0
 
 is_short = 
 is_short_close = 
-is_short_stop = strategy.position_avg_price * ( ( 100 + short_stop ) / 100 )
-is_short_limit = strategy.position_avg_price * ( ( 100 - short_limit ) / 100 )
+var is_short_stop = 0.0
+var is_short_limit = 0.0
 
 if is_long
+    is_long_stop := atr_down
+    is_long_limit := atr_up
     pstrategy.entry("long", "strategy.long")
 
 if is_long_close
@@ -50,6 +58,8 @@ if is_long_close
 pstrategy.exit("exit", "long", stop = is_long_stop, limit = is_long_limit)
 
 if is_short
+    is_short_stop := atr_up
+    is_short_limit := atr_down
     pstrategy.entry("short", "strategy.short")
 
 if is_short_close
