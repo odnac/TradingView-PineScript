@@ -1,0 +1,67 @@
+//@version=5
+//@strategy_alert_message {{strategy.order.alert_message}}
+// ************************************** POA ************************************** //
+import dokang/POA/12 as POA
+
+start_time = input.time(timestamp("2024-01-01T00:00:00+09:00"), title="start")
+end_time = input.time(timestamp("2100-08-31T01:07:00+09:00"), title="end")
+
+pstrategy = POA.bot.new("", start_time, end_time, exit_percent = 100, close_percent = 100)
+pstrategy.start_trade()
+// ********************************************************************************* //
+
+strategy("Volatility Breakout 10M",  
+ overlay=true, 
+ initial_capital = 150,
+ default_qty_type = strategy.percent_of_equity, 
+ default_qty_value = 100, 
+ process_orders_on_close = true,  
+ commission_type = strategy.commission.percent, 
+ commission_value = 0.045)
+
+k = input.float(0.6)
+f_security(_sym, _res, _src) => 
+    request.security(_sym, _res, _src[barstate.isrealtime ? 1 : 0])[barstate.isrealtime ? 0 : 1]
+o = f_security(syminfo.tickerid,"D",open)
+h = f_security(syminfo.tickerid,"D",high)
+l = f_security(syminfo.tickerid,"D",low)
+c = f_security(syminfo.tickerid,"D",close)
+var lp = 0.0
+var sl = 0.0
+var sp = 0.0
+var sl2 = 0.0
+
+if hour[1]-hour>1
+    lp := c+(h-l)*k
+    sl := (l+lp)/2
+    sp := c-(h-l)*k
+    sl2 := (h+sp)/2
+
+longcond = lp < high
+long_close = hour[1]-hour>1 or  close < sl
+
+plot(lp,"Long Entry",color=color.yellow)
+plot(sl,"Long StopLoss",color=color.red)
+
+long_close2 = hour[1]-hour>1 or close > sl2
+
+trend = input.bool(false,"Trend Following?")
+
+long_trend = trend? lp/sl > sl2/sp : true
+
+
+if longcond and strategy.opentrades == 0 and long_trend
+    pstrategy.entry("Volatility Breakout 10M", "strategy.long")
+
+if long_close
+    pstrategy.close("Volatility Breakout 10M")
+    
+long_sl = input(2, "long stoploss (%))")
+is_long_exit = strategy.position_avg_price * ( ( 100 - long_sl ) / 100 )
+
+pstrategy.exit("exit Volatility Breakout 10M", "Volatility Breakout 10M", stop = is_long_exit)
+
+var bg = 0
+if hour[1]-hour>1
+    bg := bg + 1
+bgcolor(bg/2== math.floor(bg/2) ? color.new(color.blue,95):na)

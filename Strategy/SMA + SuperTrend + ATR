@@ -1,0 +1,78 @@
+//@version=5
+//@strategy_alert_message {{strategy.order.alert_message}}
+// ************************************** POA ************************************** //
+import dokang/POA/12 as POA
+
+start_time = input.time(timestamp("2024-01-01T00:00:00+09:00"), title="start")
+end_time = input.time(timestamp("2100-08-31T01:07:00+09:00"), title="end")
+
+pstrategy = POA.bot.new("", start_time, end_time, exit_percent = 100, close_percent = 100)
+pstrategy.start_trade()
+// ********************************************************************************* //
+
+strategy("SMA + SuperTrend + ATR 1H", 
+ overlay = true, 
+ initial_capital = 250,                                                                                            
+ default_qty_type = strategy.percent_of_equity, 
+ default_qty_value = 100, 
+ commission_type = strategy.commission.percent, 
+ commission_value = 0.045,                                                                                           
+ process_orders_on_close = true)
+
+// SMA
+length_sma1D = input(24, "1D")
+length_sma2D = input(48, "2D")
+length_sma3D = input(72, "3D")
+
+sma1D = ta.sma(close, length_sma1D)
+sma2D = ta.sma(close, length_sma2D)
+sma3D = ta.sma(close, length_sma3D)
+
+plot(sma1D, color = color.red, title = "1D")
+plot(sma2D, color = color.orange, title = "2D")
+plot(sma3D, color = color.blue, title = "3D")
+
+// SuperTrend
+atrPeriod = input(10, "ATR Length")
+factor = input.float(3.0, "Factor", step = 0.01)
+
+[supertrend, direction] = ta.supertrend(factor, atrPeriod)
+
+bodyMiddle = plot((open + close) / 2, display=display.none)
+upTrend = plot(direction < 0 ? supertrend : na, "Up Trend", color = color.green, style=plot.style_linebr, display = display.none)
+downTrend = plot(direction < 0? na : supertrend, "Down Trend", color = color.red, style=plot.style_linebr, display = display.none)
+
+fill(bodyMiddle, upTrend, color.new(color.green, 90), fillgaps=false)
+fill(bodyMiddle, downTrend, color.new(color.red, 90), fillgaps=false)
+
+// trading
+st_long = direction < 0
+trand_long = sma1D > sma2D and sma2D > sma3D
+dip_long = close > sma3D and open > sma3D and high > sma3D and low > sma3D and close < sma2D and open < sma2D
+
+trand_long_close = sma1D < sma2D and sma2D < sma3D
+
+// atr SL
+atr_multi = input(3.0, "atr multiple")                                                                                            
+atr_length = input.int(title="atr length", defval=14, minval=1)
+atr_up = close + atr_multi * ta.ema(ta.tr(true), atr_length)
+atr_down = close - atr_multi * ta.ema(ta.tr(true), atr_length)
+plot(atr_up) //, style = plot.style_steplinebr)
+plot(atr_down) //, style = plot.style_steplinebr)
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+long = st_long and trand_long and dip_long
+
+long_close = trand_long_close 
+
+var is_long_exit = float(na)
+
+if long and strategy.position_size <= 0
+    is_long_exit := atr_down
+    pstrategy.entry("SMA + SuperTrend + ATR 1H", "strategy.long")
+
+if long_close
+    pstrategy.close("SMA + SuperTrend + ATR 1H")
+
+pstrategy.exit("exit SMA + SuperTrend + ATR 1H", "SMA + SuperTrend + ATR 1H", stop = is_long_exit)

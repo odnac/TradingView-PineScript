@@ -1,0 +1,74 @@
+//@version=5
+//@strategy_alert_message {{strategy.order.alert_message}}
+// ************************************** POA ************************************** //
+import dokang/POA/12 as POA
+
+start_time = input.time(timestamp("2024-01-01T00:00:00+09:00"), title="start")
+end_time = input.time(timestamp("2100-08-31T01:07:00+09:00"), title="end")
+
+pstrategy = POA.bot.new("", start_time, end_time, exit_percent = 100, close_percent = 100)
+pstrategy.start_trade()
+// ********************************************************************************* //
+
+strategy("ST + 50EMA + DMI", 
+ overlay = true, 
+ process_orders_on_close = true, 
+ initial_capital = 650, 
+ default_qty_type = strategy.percent_of_equity, 
+ default_qty_value = 100, 
+ commission_type = strategy.commission.percent, 
+ commission_value = 0.04)
+
+//dmi
+lensig = input.int(14, title="ADX Smoothing", minval=1, maxval=50)
+len = input.int(14, minval=1, title="DI Length")
+up = ta.change(high)
+down = -ta.change(low)
+plusDM = na(up) ? na : (up > down and up > 0 ? up : 0)
+minusDM = na(down) ? na : (down > up and down > 0 ? down : 0)
+trur = ta.rma(ta.tr, len)
+plus = fixnan(100 * ta.rma(plusDM, len) / trur)
+minus = fixnan(100 * ta.rma(minusDM, len) / trur)
+sum = plus + minus
+adx = 100 * ta.rma(math.abs(plus - minus) / (sum == 0 ? 1 : sum), lensig)
+
+//ema50
+input_sma = input(50)
+sma50 = ta.ema(close, input_sma)
+plot(sma50)
+
+// SUPERTREND
+supertrend_atrPeriod1 = input(10, "ATR Length")
+supertrend_factor1 = input.float(3.0, "Factor", step = 0.01)
+
+[supertrend_supertrend1, supertrend_direction1] = ta.supertrend(supertrend_factor1, supertrend_atrPeriod1)
+
+supertrend_bodyMiddle = plot((open + close) / 2, display=display.none)
+supertrend_upTrend = plot(supertrend_direction1 < 0 ? supertrend_supertrend1 : na, "Up Trend", color = color.green, style=plot.style_linebr)
+supertrend_downTrend = plot(supertrend_direction1 < 0? na : supertrend_supertrend1, "Down Trend", color = color.red, style=plot.style_linebr)
+
+fill(supertrend_bodyMiddle, supertrend_upTrend, color.new(color.green, 90), fillgaps=false)
+fill(supertrend_bodyMiddle, supertrend_downTrend, color.new(color.red, 90), fillgaps=false)
+
+supertrend_atrPeriod = input(10, "ATR Length")
+supertrend_factor = input.float(3.0, "Factor", step = 0.01)
+
+[_, supertrend_direction] = ta.supertrend(supertrend_factor, supertrend_atrPeriod)
+
+supertrend_long = (supertrend_direction) < 0
+supertrend_short = (supertrend_direction) > 0
+
+///////////////////////////////////////////// strategy /////////////////////////////////////////////
+is_long = ( ta.crossover(close, sma50) or close > sma50 ) and up[1] < up[0] and down[1] > down[0] and supertrend_long
+is_long_close = ta.crossunder(close, sma50)
+
+long_sl = input(2, "long stoploss (%))")        
+is_long_exit = strategy.position_avg_price * ( ( 100 - long_sl ) / 100 )
+
+if is_long
+    pstrategy.entry("ST + 50EMA + DMI", "strategy.long")
+
+if is_long_close
+    pstrategy.close("ST + 50EMA + DMI")
+
+pstrategy.exit("exit ST + 50EMA + DMI", "ST + 50EMA + DMI", stop = is_long_exit)
