@@ -1,0 +1,4 @@
+//@version=5
+indicator("Hammer", overlay=true)
+isHammer = (close > open) and ((high - low) > 2 * (close - open)) and ((close - low) / (.001 + high - low) > 0.6)
+plotshape(series=isHammer, location=location.belowbar, color=color.green, style=shape.labelup, text="H")
