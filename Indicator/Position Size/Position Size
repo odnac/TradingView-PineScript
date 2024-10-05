@@ -1,34 +1,86 @@
 //@version=5
-indicator("position size (atr)")
+indicator("position size")
 
-IC = input(1600, "init_capital")
-LEVER = input(20.0, "leverage")
-SL = input(2.0, "stop_loss(%)")
+/////////////////////////////////////////////////////////
+///////////////////////// input /////////////////////////
+/////////////////////////////////////////////////////////
+IC = input(1500, "init_capital", group = "setting")
+SL = input.float(2.0, "max stop_loss(%) of total funds per position", minval = 0.01, maxval = 100.00, group = "setting")
+atr_length = input.int(title="ATR_Length", defval=24, minval=1, group = "ATR")
+atr_multiple = input.int(title = "ATR_multiple", defval = 2, minval=1, group = "ATR")
+manual_SL = input.float(0.5, "manual_SL(%)", minval = 0.01, maxval = 100.00, group = "manual stop loss")
+FIX_LEVER = input.int(50, "fixed leverage", minval = 1, maxval = 100, group = "FIX_LEVER")
 
-////////// fix stop_loss ////////// 
-fix_position_size = IC / LEVER // 한 포지션 최대 투자 가능 금액
-// plot(fix_position_size , "fix_ size(usdt)", color.green)
-// plot(fix_position_size * LEVER, "leverage * fix_ size(usdt)", color.green)
-
-////////// ATR ////////// 
-atr_length = input.int(title="ATR_Length", defval=24, minval=1)
+/////////////////////////////////////////////////////////
+//////////////////////// formula ////////////////////////
+/////////////////////////////////////////////////////////
+// total_2_per
+total_2_per = IC * ( SL / 100 )
+// atr_SL
 pine_atr(length) =>
     trueRange = na(high[1])? high-low : math.max(math.max(high - low, math.abs(high - close[1])), math.abs(low - close[1]))
     ta.ema(trueRange, length)
-
 atr_val = pine_atr(atr_length)
-atr_SL = (2 * atr_val)  * 100 / close
+atr_SL = (atr_multiple * atr_val)  * 100 / close
+// atr_optimization_LEVER
+var float atr_optimization_LEVER = na
+atr_optimization_LEVER := switch true
+    (atr_SL >= 0 and atr_SL <= 1) => 100
+    (atr_SL > 1) => math.floor(100 / atr_SL)
+// manual_optimization_LEVER
+var float manual_optimization_LEVER = na
+manual_optimization_LEVER := switch true
+    (manual_SL >= 0 and manual_SL < 1) => 100
+    (manual_SL >= 1) => math.floor(100 / manual_SL)
+// atr_position_size
+atr_position_size = IC * (SL / 100) / (atr_SL / 100) / FIX_LEVER 
 
+/////////////////////////////////////////////////////////
+//////////////////// 2% of total fund ///////////////////
+/////////////////////////////////////////////////////////
+plot(0, "2% of total fund", color.black)
+plot(FIX_LEVER, "FIX_LEVER", color.white)
+plot(total_2_per, "usdt", color.blue)
+plot(total_2_per * FIX_LEVER, "usdt * FIX_LEVER", color.blue)
+plot(manual_SL , "manual_SL(%)", color.red)
+plot(manual_SL * FIX_LEVER, "manual_SL(%) * FIX_LEVER", color.red)
+
+/////////////////////////////////////////////////////////
+///////// ATR(%) stop loss & optimization_LEVER /////////
+/////////////////////////////////////////////////////////
+plot(0, "ATR(%) stop loss & optimization_LEVER", color.black)
+plot(atr_optimization_LEVER, "atr_optimization_LEVER", color.white)
+plot(total_2_per / (atr_SL / 100) / atr_optimization_LEVER, "usdt", color.orange)
+plot(total_2_per / (atr_SL / 100), "usdt * atr_optimization_LEVER", color.orange)
+plot(atr_SL , "atr_SL(%)", color.red)
+plot(atr_SL * atr_optimization_LEVER, "atr_ stop loss(%) * atr_optimization_LEVER", color.red)
+
+/////////////////////////////////////////////////////////
+//////// manual stop loss(%) & optimization_LEVER ///////
+/////////////////////////////////////////////////////////
+plot(0, "manual stop loss(%) & optimization_LEVER", color.black)
+plot(manual_optimization_LEVER, "manual_optimization_LEVER", color.white)
+plot(total_2_per / (manual_SL / 100) / manual_optimization_LEVER, "usdt", color.orange) // manual_optimization_LEVER * manual_SL >= 100 ? 0 : 
+plot(total_2_per / (manual_SL / 100), "usdt * manual_optimization_LEVER", color.orange) // manual_optimization_LEVER * manual_SL >= 100 ? 0 : 
+plot(manual_SL , "manual_SL(%)", color.red)
+plot(manual_SL * manual_optimization_LEVER, "manual_SL(%) * manual_optimization_LEVER", color.red)
+
+/////////////////////////////////////////////////////////
+//////////////// ATR(%) & fixed leverage ////////////////
+/////////////////////////////////////////////////////////
+plot(0, "ATR & fixed leverage", color.black)
+plot(FIX_LEVER, "fixed leverage", color.white)
+plot(atr_position_size  , "usdt", color.green)
+plot(atr_position_size * FIX_LEVER, "usdt * FIX_LEVER", color.green)
 plot(atr_SL , "atr_ stop loss(%)", color.red)
-plot(atr_SL * LEVER, "atr_ stop loss(%) * LEVER", color.red)
+plot(atr_SL * FIX_LEVER , "atr_ stop loss(%) * FIX_LEVER", color.red)
 
-////////// entry position_size == IC 2% ////////// 
-total_fund_2 = IC * ( SL / 100 )
-plot(series = total_fund_2, title = "2% of total funds", color = color.white)
-plot(series = total_fund_2 * LEVER, title = "2% of total funds * LEVER", color = color.white)
-
-////////// entry loss size == IC 2% ////////// 
-atr_position_size = IC * (SL / 100) / (atr_SL / 100) / LEVER 
-// plot(atr_position_size  , "atr_ size(usdt)", color.green)
-// plot(atr_position_size * LEVER, "atr_ size(usdt) * LEVER", color.green)
-
+/////////////////////////////////////////////////////////
+////////// manual stop loss(%) & fixed leverage /////////
+/////////////////////////////////////////////////////////
+plot(0, "manual stop loss(%) & fixed leverage", color.black)
+plot(FIX_LEVER, "fixed leverage", color.white)
+plot(total_2_per / (manual_SL / 100) / FIX_LEVER, "usdt", color.green)
+plot(total_2_per / (manual_SL / 100), "usdt * FIX_LEVER", color.green)
+plot(manual_SL , "manual_SL(%)", color.red)
+plot(manual_SL * FIX_LEVER, "manual_SL(%) * FIX_LEVER", color.red)
