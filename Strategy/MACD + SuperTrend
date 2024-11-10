@@ -1,0 +1,55 @@
+//@version=5
+//@strategy_alert_message {{strategy.order.alert_message}}
+// ************************************** POA ************************************** //
+import dokang/POA/12 as POA
+
+start_time = input.time(timestamp("2024-01-01T00:00:00+09:00"), title="start")
+end_time = input.time(timestamp("2100-08-31T01:07:00+09:00"), title="end")
+
+pstrategy = POA.bot.new("", start_time, end_time, exit_percent = 100, close_percent = 100)
+pstrategy.start_trade()
+// ********************************************************************************* //
+
+strategy("MACD + ST 1H", 
+ overlay=true, 
+ initial_capital = 500,
+ default_qty_type = strategy.percent_of_equity, 
+ default_qty_value = 100, 
+ process_orders_on_close = true, 
+ commission_type = strategy.commission.percent, 
+ commission_value = 0.05)
+
+// MACD
+fastLength = input(70)
+slowlength = input(100)
+MACDLength = input(200)
+MACD = ta.ema(close, fastLength) - ta.ema(close, slowlength)
+aMACD = ta.ema(MACD, MACDLength)
+delta = MACD - aMACD
+
+// ST
+atrPeriod = input(10, "ATR Length")
+factor = input.float(3.0, "Factor", step = 0.01)
+
+[supertrend, direction] = ta.supertrend(factor, atrPeriod)
+
+bodyMiddle = plot((open + close) / 2, display=display.none)
+upTrend = plot(direction < 0 ? supertrend : na, "Up Trend", color = color.green, style=plot.style_linebr, display = display.none)
+downTrend = plot(direction < 0? na : supertrend, "Down Trend", color = color.red, style=plot.style_linebr, display = display.none)
+
+fill(bodyMiddle, upTrend, color.new(color.green, 90), fillgaps=false)
+fill(bodyMiddle, downTrend, color.new(color.red, 90), fillgaps=false)
+
+///////////////////////////////////////////// strategy /////////////////////////////////////////////
+long = ta.crossover(delta, 0) and direction < 0
+long_close = ta.crossunder(delta, 0)
+long_sl = input(2.0, "long stop (%))")
+is_long_exit = strategy.position_avg_price * ( ( 100 - long_sl ) / 100 )
+
+if long
+    pstrategy.entry("MACD + ST 1H", "strategy.long")
+
+if long_close
+    pstrategy.close("MACD + ST 1H")
+
+pstrategy.exit("exit MACD + ST 1H", "MACD + ST 1H", stop = is_long_exit)
