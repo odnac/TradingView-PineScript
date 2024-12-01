@@ -1,0 +1,12 @@
+//@version=5
+indicator(title="Day[1] h/l/o/c", overlay=true)
+
+D_High = request.security(syminfo.tickerid, 'D', high[1], barmerge.gaps_off, barmerge.lookahead_on) 
+D_Low = request.security(syminfo.tickerid, 'D', low[1], barmerge.gaps_off, barmerge.lookahead_on) 
+D_Close = request.security(syminfo.tickerid, 'D', close[1], barmerge.gaps_off, barmerge.lookahead_on) 
+D_Open = request.security(syminfo.tickerid, 'D', open[1], barmerge.gaps_off, barmerge.lookahead_on) 
+
+plot(D_High, title="Daily High", color=color.rgb(255, 235, 59, 50), linewidth=1) 
+plot(D_Low, title="Daily Low", color=color.rgb(255, 235, 59, 50), linewidth=1) 
+
+plot((D_High + D_Low) / 2, title="Daily Low", color=color.red, linewidth=1) 
