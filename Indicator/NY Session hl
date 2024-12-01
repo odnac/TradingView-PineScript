@@ -1,0 +1,66 @@
+//@version=5
+indicator("Swing High-Low Marker (UTC)", shorttitle="NY session high/low", overlay=true)
+
+newYorkOpenHour = 13       // 세션 시작 (UTC)
+closingHour = 22           // 세션 종료 (UTC, 다음 날)
+finalHour = 0             // 추가 표시 시간 (UTC)
+
+// 현재 시간을 UTC로 변환 (현재 시간은 이미 UTC로 제공되므로 시간 변환이 필요 없음)
+currentHour = hour(time)  // UTC 시간 사용
+currentMinute = minute(time)
+
+// 세션 시간 조건 확인
+isNewYorkOpen = (currentHour == newYorkOpenHour) and (currentMinute == 0)
+isClosing = (currentHour == closingHour) and (currentMinute == 0)
+isFinalHour = (currentHour == finalHour) and (currentMinute == 0)
+isWithinRange = (currentHour >= newYorkOpenHour) or (currentHour < closingHour)
+
+// 오프닝 가격 처리
+var float openingPriceLine = na
+var line openingLine = na
+var label openLabel = na
+
+if isNewYorkOpen
+    openingPriceLine := open
+    openingLine := line.new(x1 = bar_index, y1 = openingPriceLine, x2 = bar_index, y2 = openingPriceLine, width = 1, color = color.blue)
+    openLabel := label.new(x = bar_index, y = openingPriceLine, text = "NY Open", color = color.white, style = label.style_label_right, size = size.small)
+
+// 세션 내 고점 및 저점 처리
+var float dailyHigh = na
+var float dailyLow = na
+var line highLine = na
+var line lowLine = na
+var label highLabel = na
+var label lowLabel = na
+
+if isNewYorkOpen
+    dailyHigh := high
+    dailyLow := low
+    highLine := line.new(x1 = bar_index, y1 = dailyHigh, x2 = bar_index, y2 = dailyHigh, width = 1, color = color.green)
+    lowLine := line.new(x1 = bar_index, y1 = dailyLow, x2 = bar_index, y2 = dailyLow, width = 1, color = color.red)
+    highLabel := label.new(x = bar_index, y = dailyHigh, text = "Daily High", color = color.green, style = label.style_label_right, size = size.small)
+    lowLabel := label.new(x = bar_index, y = dailyLow, text = "Daily Low", color = color.red, style = label.style_label_right, size = size.small)
+
+else if isWithinRange
+    if high > dailyHigh
+        dailyHigh := high
+        line.set_y1(highLine, dailyHigh)
+        line.set_y2(highLine, dailyHigh)
+        label.set_y(highLabel, dailyHigh)
+
+    if low < dailyLow
+        dailyLow := low
+        line.set_y1(lowLine, dailyLow)
+        line.set_y2(lowLine, dailyLow)
+        label.set_y(lowLabel, dailyLow)
+
+// 세션 종료 처리
+if isFinalHour
+    line.set_x2(highLine, bar_index)
+    line.set_x2(lowLine, bar_index)
+
+if isClosing
+    line.set_x2(openingLine, bar_index)
+    label.set_x(openLabel, line.get_x1(openingLine) -3)  // 선의 왼쪽, 살짝 이동
+    label.set_x(highLabel, line.get_x1(highLine) -3)
+    label.set_x(lowLabel, line.get_x1(lowLine) -3)
