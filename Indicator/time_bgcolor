@@ -1,0 +1,6 @@
+//@version=5
+indicator("time_bgcolor", overlay=true)
+
+currentTime = timestamp("GMT", year, month, dayofmonth, 0, 0)
+is_time = (time >= currentTime and time < currentTime + 60000)
+bgcolor(is_time ? color.rgb(232, 245, 55, 70) : na)
