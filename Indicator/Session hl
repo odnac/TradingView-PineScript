@@ -1,5 +1,5 @@
 //@version=5
-indicator("Swing High-Low Marker (UTC)", shorttitle="NY session high/low", overlay=true)
+indicator("Session hl", shorttitle="NY session high/low", overlay=true)
 
 newYorkOpenHour = 13       // 세션 시작 (UTC)
 closingHour = 22           // 세션 종료 (UTC, 다음 날)
