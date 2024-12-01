@@ -1,0 +1,45 @@
+//@version=5
+indicator("position size v2")
+
+/////////////////////////////////////////////////////////
+///////////////////////// input /////////////////////////
+/////////////////////////////////////////////////////////
+IC = input(1500, "init_capital", group = "setting")
+RISK_IC = input.float(2.0, "Maximum Risk (%) per Position of Total Capital", minval = 0.01, maxval = 100.00, group = "setting")
+manual_SL = input.float(3, "manual_SL(%)", minval = 0.01, maxval = 100.00, group = "manual stop loss")
+manual_LEVER = input.int(50, "manual leverage", minval = 1, maxval = 100, group = "manual_LEVER")
+safety_margin = input.float(0.8, "Safety Margin", minval = 0.01, maxval = 1.00, group = "Safety Margin for Leverage")
+
+/////////////////////////////////////////////////////////
+//////////////////////// formula ////////////////////////
+/////////////////////////////////////////////////////////
+// risk
+risk = IC * ( RISK_IC / 100 )
+// auto_LEVER
+var float auto_LEVER = na
+auto_LEVER := switch true
+    (manual_SL >= 0 and manual_SL < 1) => 100
+    (manual_SL >= 1) => math.floor(100 / manual_SL)
+// optimization_LEVER
+optimization_LEVER = auto_LEVER * safety_margin
+
+/////////////////////////////////////////////////////////
+////////// manual stop loss(%) & manual leverage /////////
+/////////////////////////////////////////////////////////
+plot(0, "### SL(%) == manual stop loss(%) & manual leverage", color.black)
+plot(manual_LEVER, "manual leverage", color.white)
+plot(risk / (manual_SL / 100) / manual_LEVER, "usdt", color.green)
+plot(risk / (manual_SL / 100), "usdt * manual_LEVER", color.green)
+plot(manual_SL , "manual_SL(%)", color.red)
+plot(manual_SL * manual_LEVER, "manual_SL(%) * manual_LEVER", color.red)
+
+/////////////////////////////////////////////////////////
+////////// manual stop loss(%) & optimization_LEVER //////////
+/////////////////////////////////////////////////////////
+plot(0, "### SL(%) == manual stop loss(%) & optimization leverage", color.black)
+plot(optimization_LEVER, "optimization_LEVER", color.white)
+plot(risk / (manual_SL / 100) / (optimization_LEVER), "usdt", color.green)
+plot(risk / (manual_SL / 100), "usdt * optimization_LEVER", color.green)
+plot(manual_SL , "manual_SL(%)", color.red)
+plot(manual_SL * optimization_LEVER, "manual_SL(%) * optimization_LEVER", color.red)
+
