@@ -2,7 +2,7 @@
 // © odnac
 
 //@version=6
-indicator("Sessions high/low", overlay = true, max_boxes_count = 500, max_labels_count = 500, max_lines_count = 500)
+indicator("Market Sessions", overlay = true, max_boxes_count = 500, max_labels_count = 500, max_lines_count = 500)
 
 // This code is a slightly modified version of By Leviathan's code. // Market Sessions - By Leviathan
 
