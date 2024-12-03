@@ -4,6 +4,8 @@
 //@version=6
 indicator("Sessions high/low", overlay = true, max_boxes_count = 500, max_labels_count = 500, max_lines_count = 500)
 
+// This code is a slightly modified version of By Leviathan's code. // Market Sessions - By Leviathan
+
 // Session 1 - user inputs
 showTokyo      = input.bool(true, '', inline='Tokyo', group='Sessions')
 stringTokyo    = input.string('Tokyo', '', inline='Tokyo', group='Sessions')
